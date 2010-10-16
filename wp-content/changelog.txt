@@ -1,0 +1,61 @@
+Plugin Name: Multi-Domains for Multisite
+Author: Ulrich Sossou (Incsub)
+
+Change Log:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+1.0.6 - 10/16/2010
+----------------------------------------------------------------------
+- Bug fix: domain choice field appears on site admin blog edit page
+- Bug fix: improper redirection when the main site url start with www
+- Bug fix: authentification cookie not set when uppercase letters in
+the domain name
+- Enhancement: display domain names in alphabetical order
+
+1.0.5 - 10/10/2010
+----------------------------------------------------------------------
+- Bug fix: domain choice field appears on site admin blog edit page
+
+1.0.4 - 10/04/2010
+----------------------------------------------------------------------
+- Bug fix: no error message displayed when and existing user tries to
+register a blog with a name already used
+- Bug fix: incorrect admin help text and wildcard subdomain warning
+with subdir installs
+
+1.0.3 - 09/15/2010
+----------------------------------------------------------------------
+- Fixed issue with blog registration on subdomains installs
+
+1.0.2 - 09/05/2010
+----------------------------------------------------------------------
+- Fixed issue when dashboard site is defined.
+- Fixed 301 redirects from addon domains to main site.
+- Add IIS support for redirects from addon domains to main site.
+
+1.0.1 - 09/01/2010
+----------------------------------------------------------------------
+- Added domain field to BuddyPress registration page.
+- Fixed compatibility issue with Anti-Slog plugin.
+
+1.0.0 - 08/31/2010
+----------------------------------------------------------------------
+- Added domain field to the Add Site for on Super Admin >
+Multi-Domains page.
+
+Beta 2 - 08/31/2010
+----------------------------------------------------------------------
+- Used load_muplugin_textdomain() and load_plugin_textdomain() for
+translation.
+- Added 'md_show_restricted_domains' filter hook.
+- Added main site as default when plugin is activated.
+
+Beta 1 - 08/30/2010
+----------------------------------------------------------------------
+- Fixed bug that shown double site name in the activation mails.
+- Added instructions on the settings page.
+
+Alpha - 08/29/2010
+----------------------------------------------------------------------
+- Initial Release.
