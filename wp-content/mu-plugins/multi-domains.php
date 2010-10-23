@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.0.6
+Version: 1.0.7
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -39,7 +39,7 @@ class multi_domain {
   /**
   * @var string $version Plugin version
   */
-	var $version = '1.0.1';
+	var $version = '1.0.7';
 
   /**
   * @var string $pluginpath Path to plugin files
@@ -757,7 +757,8 @@ class multi_domain {
 	function extend_admin_blogform() {
 		global $pagenow;
 
-		if( $pagenow !== 'wpmu-blogs.php' || $pagenow !== 'ms-sites.php' || isset( $_GET['action'] ) && $_GET['action'] !== 'list' ) return;
+		if( $pagenow !== 'ms-sites.php' || isset( $_GET['action'] ) && $_GET['action'] !== 'list' )
+			return;
 
 		if( is_subdomain_install() ) {
 ?>

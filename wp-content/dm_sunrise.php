@@ -1,4 +1,9 @@
 <?php
+
+if ( defined( 'COOKIE_DOMAIN' ) ) {
+	die( 'The constant "COOKIE_DOMAIN" is defined (probably in wp-config.php). Please remove or comment out that define() line.' );
+}
+
 // Compatibility mode
 define('DM_COMPATIBILITY', 'yes');
 

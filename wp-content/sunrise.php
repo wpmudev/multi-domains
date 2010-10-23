@@ -1,5 +1,9 @@
 <?php
 
+if ( defined( 'COOKIE_DOMAIN' ) ) {
+	die( 'The constant "COOKIE_DOMAIN" is defined (probably in wp-config.php). Please remove or comment out that define() line.' );
+}
+
 global $wpdb;
 
 $using_domain = $wpdb->escape( $_SERVER[ 'HTTP_HOST' ] );
