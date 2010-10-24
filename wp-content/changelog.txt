@@ -5,6 +5,11 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.0.7 - 10/23/2010
+----------------------------------------------------------------------
+- Bug fix: domain choice field does not appear on site admin sites page
+- Enhancement: check if COOKIE_DOMAIN is already defined
+
 1.0.6 - 10/16/2010
 ----------------------------------------------------------------------
 - Bug fix: domain choice field appears on site admin blog edit page
