@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.0.7
+Version: 1.0.8
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -954,10 +954,12 @@ class multi_domain {
 		if ( class_exists( 'domain_map' ) && defined( 'DOMAIN_MAPPING' ) ) {
 			$domain = $this->db->get_var( "SELECT domain FROM {$this->db->dmtable} WHERE blog_id = '{$userblog_id}' ORDER BY id LIMIT 1" );
 			if($domain) {
+				$dom = $domain;
 				$url = 'http://' . $domain . '/';
 			}
 		} else {
 			$domains = $this->db->get_row( "SELECT domain, path FROM {$this->db->blogs} WHERE blog_id = '{$userblog_id}' LIMIT 1" );
+			$dom = $domains->domain;
 			$url = 'http://' . $domains->domain . $domains->path;
 		}
 
@@ -968,7 +970,7 @@ class multi_domain {
 			$user = wp_get_current_user();
 
 			if( !array_key_exists( $hash, (array) $key ) ) {
-				$key[$hash.$url] = array (
+				$key[$hash.$dom] = array (
 					"domain"	=> $url,
 					"hash"		=> $hash,
 					"user_id"	=> $user->ID,
@@ -992,13 +994,18 @@ class multi_domain {
 	function build_stylesheet_for_cookie() {
 
 		if( isset( $_GET['build'] ) && addslashes( $_GET['build'] ) == date( "Ymd", strtotime( '-24 days' ) ) ) {
+			header("Content-type: text/css");
+			echo "/* Sometimes me think what is love, and then me think love is what last cookie is for. Me give up the last cookie for you. */";
+			define( 'DONOTCACHEPAGE', 1 ); // don't let wp-super-cache cache this page.
+
 			// We have a stylesheet with a build and a matching date - so grab the hash
 			$url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH );
-			$hash = str_replace( '.css', '', basename( $url ) );
+			$hash = str_replace( '.css', '', basename( $url ) ) . $_SERVER[ 'HTTP_HOST' ];
 
 			$key = get_option( 'cross_domain' );
 
 			if( array_key_exists( $hash, (array) $key ) ) {
+
 				if( !is_user_logged_in() ) {
 					// Set the cookies
 					switch( $key[$hash]['action'] ) {
@@ -1019,21 +1026,17 @@ class multi_domain {
 							break;
 					}
 				}
-
-		        header("Content-type: text/css");
-				echo "/* Sometimes me think what is love, and then me think love is what last cookie is for. Me give up the last cookie for you. */";
-				define( 'DONOTCACHEPAGE', 1 ); // don't let wp-super-cache cache this page.
 				$url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_HOST );
 				unset( $key[$hash.$url] );
 				update_option( 'cross_domain', (array) $key );
 				die();
 			}
+			die();
 		}
 	}
 
 }
 
 $multi_dm =& new multi_domain();
-
 
 ?>

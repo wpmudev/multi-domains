@@ -26,7 +26,7 @@ $mapped_id = $wpdb->get_var( "SELECT blog_id FROM {$wpdb->dmtable} WHERE domain 
 
 $wpdb->suppress_errors( false );
 
-if ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== preg_replace( "/^www\./", "", $using_domain ) ) {
+if ( !$mapped_id && preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== preg_replace( "/^www\./", "", $using_domain ) ) {
 	$md_domains = unserialize( $wpdb->get_var( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key = 'md_domains' AND site_id = 1" ) );
 
 	if( $_SERVER['REQUEST_URI'] == '/' ) {
@@ -66,9 +66,9 @@ if( $mapped_id ) {
 
 	define( 'COOKIE_DOMAIN', $_SERVER[ 'HTTP_HOST' ] );
 
-	$current_site = $wpdb->get_row( "SELECT * from {$wpdb->site} WHERE id = '{$current_blog->site_id}' LIMIT 0,1 /* domain mapping */" );
+	$this_site = $wpdb->get_row( "SELECT * from {$wpdb->site} WHERE id = '{$current_blog->site_id}' LIMIT 0,1 /* domain mapping */" );
 
-	$current_blog->path = $current_site->path;
+	$current_blog->path = $this_site->path;
 
 	define( 'DOMAIN_MAPPING', 1 );
 
