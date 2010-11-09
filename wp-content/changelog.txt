@@ -5,6 +5,17 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.0.8 - 11/09/2010
+----------------------------------------------------------------------
+- Enhancement: Keep selected domain after signup error
+- Enhancement: Don't redirect to main site when a multi-domain is also
+a mapped domain
+- Enhancement: Don't display php error when sunrise.php does not find
+any multi-domain
+- Bug fix: Domain Mapping sunrise.php overwriting the global
+$current_site
+- Bug fix: Cookies stylesheets return 404
+
 1.0.7 - 10/23/2010
 ----------------------------------------------------------------------
 - Bug fix: domain choice field does not appear on site admin sites page
