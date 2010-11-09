@@ -742,8 +742,10 @@ class multi_domain {
 		if( count( $domains = $this->domains ) > 1 ) {
 			echo '<select id="domain" name="domain">';
 				foreach( $domains as $domain ) {
-					if( is_super_admin() || ( $domain['domain_status'] == 'restricted'  && $this->show_restricted_domains() == true ) || $domain['domain_status'] !== 'private' )
-						echo '<option value="' . $domain['domain_name'] . '">' . $domain['domain_name'] . '</option>';
+					if( is_super_admin() || ( $domain['domain_status'] == 'restricted'  && $this->show_restricted_domains() == true ) || $domain['domain_status'] !== 'private' ) {
+						$selected = ( isset( $_POST['domain'] ) && ( $_POST['domain'] == $domain['domain_name'] ) ) ? ' selected="selected"' : '';
+						echo '<option value="' . $domain['domain_name'] . '"' . $selected . '>' . $domain['domain_name'] . '</option>';
+					}
 				}
 			echo '</select>';
 		} else {
