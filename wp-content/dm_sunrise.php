@@ -19,13 +19,13 @@ if(defined('DM_COMPATIBILITY')) {
 
 $wpdb->suppress_errors();
 
-$using_domain = $wpdb->escape( $_SERVER[ 'HTTP_HOST' ] );
+$using_domain = $wpdb->escape( preg_replace( "/^www\./", "", $_SERVER[ 'HTTP_HOST' ] ) );
 
 $mapped_id = $wpdb->get_var( "SELECT blog_id FROM {$wpdb->dmtable} WHERE domain = '{$using_domain}' LIMIT 1 /* domain mapping */" );
 
 $wpdb->suppress_errors( false );
 
-if ( !$mapped_id && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== preg_replace( "/^www\./", "", $using_domain ) ) ) {
+if ( !$mapped_id && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $using_domain ) ) {
 	$md_domains = unserialize( $wpdb->get_var( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key = 'md_domains' AND site_id = 1" ) );
 
 	if( $_SERVER['REQUEST_URI'] == '/' ) {
@@ -49,7 +49,7 @@ if ( !$mapped_id && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== pr
 	}
 
 	foreach( $md_domains as $domain ) {
-		if ( preg_match( '|' . strtolower( $domain['domain_name'] ) . '$|', preg_replace( "/^www\./", "", $using_domain ) ) ) {
+		if ( preg_match( '|' . strtolower( $domain['domain_name'] ) . '$|', $using_domain ) ) {
 			define( 'COOKIE_DOMAIN', '.' . strtolower( $domain['domain_name'] ) );
 			break;
 		}

@@ -6,9 +6,9 @@ if ( defined( 'COOKIE_DOMAIN' ) ) {
 
 global $wpdb;
 
-$using_domain = $wpdb->escape( $_SERVER[ 'HTTP_HOST' ] );
+$using_domain = $wpdb->escape( preg_replace( "/^www\./", "", $_SERVER[ 'HTTP_HOST' ] ) );
 
-if ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== preg_replace( "/^www\./", "", $using_domain ) ) {
+if ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $using_domain ) {
 	$md_domains = unserialize( $wpdb->get_var( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key = 'md_domains' AND site_id = 1" ) );
 
 	if( is_array( $md_domains ) ) {
@@ -33,7 +33,7 @@ if ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== preg_replace( "/^ww
 		}
 
 		foreach( $md_domains as $domain ) {
-			if ( preg_match( '|' . strtolower( $domain['domain_name'] ) . '$|', preg_replace( "/^www\./", "", $using_domain ) ) ) {
+			if ( preg_match( '|' . strtolower( $domain['domain_name'] ) . '$|', $using_domain ) ) {
 				define( 'COOKIE_DOMAIN', '.' . strtolower( $domain['domain_name'] ) );
 				break;
 			}

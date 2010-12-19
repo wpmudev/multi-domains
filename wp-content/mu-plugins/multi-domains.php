@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.0.9
+Version: 1.1
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -11,64 +11,65 @@ Author URI: http://ulrichsossou.com
 WDP ID: 154
 */
 
-/*  Copyright 2010 Incsub (http://incsub.com/)
-    Based on work by Joe Jacobs (http://joejacobs.org/), Barry Getty (http://caffeinatedb.com/) and Donncha (http://ocaoimh.ie/)
+/*
+Copyright 2010 Incsub (http://incsub.com/)
+Based on work by Joe Jacobs (http://joejacobs.org/), Barry Getty (http://caffeinatedb.com/) and Donncha (http://ocaoimh.ie/)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 class multi_domain {
 
-  /**
-  * @var string $textdomain Domain used for localization
-  */
-  var $textdomain = "multi_domain";
+	/**
+	* @var string $textdomain Domain used for localization
+	*/
+	var $textdomain = 'multi_domain';
 
-  /**
-  * @var string $version Plugin version
-  */
-	var $version = '1.0.9';
+	/**
+	* @var string $version Plugin version
+	*/
+	var $version = '1.1';
 
-  /**
-  * @var string $pluginpath Path to plugin files
-  */
+	/**
+	* @var string $pluginpath Path to plugin files
+	*/
 	var $pluginpath;
 
-  /**
-  * @var string $pluginurl Plugin directory url
-  */
+	/**
+	* @var string $pluginurl Plugin directory url
+	*/
 	var $pluginurl;
 
-  /**
-  * @var object $db Database object
-  */
+	/**
+	* @var object $db Database object
+	*/
 	var $db;
 
-  /**
-  * @var object $current_site Temporary stores $current_site global
-  */
+	/**
+	* @var object $current_site Temporary stores $current_site global
+	*/
 	var $current_site;
 
-  /**
-  * @var array $domains Domains list
-  */
+	/**
+	* @var array $domains Domains list
+	*/
 	var $domains = array();
 
-  /**
-  * PHP5 constructor
-  */
+	/**
+	* PHP5 constructor
+	*/
 	function __construct() {
 
 		global $wpdb;
@@ -98,9 +99,9 @@ class multi_domain {
 
 	}
 
-  /**
-  * PHP4 constructor
-  */
+	/**
+	* PHP4 constructor
+	*/
 	function multi_domain() {
 		$this->__construct();
 	}
@@ -124,6 +125,9 @@ class multi_domain {
 			update_site_option( 'md_domains', apply_filters( 'md_default_domains', $domains ) );
 			update_site_option( 'md_version', $this->version );
 		}
+
+		if( version_compare( $this->version, $version, '>' ) )
+			update_site_option( 'md_version', $this->version );
 
 	}
 
@@ -239,10 +243,10 @@ class multi_domain {
 		$domains = $this->domains;
 
 		foreach( $domains as $domain ) {
-			foreach( $domain as $key=>$value ) {
-				if( !isset( $sort_array[$key] ) ) {
+			foreach( $domain as $key => $value ) {
+				if( !isset( $sort_array[$key] ) )
 					$sort_array[$key] = array();
-				}
+
 				$sort_array[$key][] = $value;
 			}
 		}
@@ -268,8 +272,8 @@ class multi_domain {
 		}
 
 		if( empty( $domain_exists ) ) {
-			$domains[] = $domain;
-			$this->domains = apply_filters( 'md_add_domain', $domains );
+			$domains[] = apply_filters( 'md_add_domain', $domain );
+			$this->domains = $domains;
 			return true;
 		} else {
 			return new WP_Error( 'md_domain_exists', sprintf( __( "The domain %s is already in the list.", $this->textdomain ), $domain['domain_name'] ) );
@@ -287,14 +291,16 @@ class multi_domain {
 
 		for( $i = 0; $i < count( $domains ); $i++ ) {
 			if( $domains[$i]['domain_name'] == $domain['domain_name'] ) {
-				$domains[$i]['domain_status'] = $domain['domain_status'];
+				$current_domain = $domains[$i];
+				$current_domain['domain_status'] = $domain['domain_status'];
+				$domains[$i] = apply_filters( 'md_update_domain', $current_domain, $domain );
 				$domain_exists = 1;
 				break;
 			}
 		}
 
 		if( !empty( $domain_exists ) ) {
-			$this->domains = apply_filters( 'md_update_domain', $domains );
+			$this->domains = $domains;
 			return true;
 		} else {
 			return new WP_Error( 'md_domain_not_found', sprintf( __( "The domain %s was not found in the list.", $this->textdomain ), $domain['domain_name'] ) );
@@ -302,6 +308,23 @@ class multi_domain {
 
 	}
 
+	/**
+	 * Get domain attributes.
+	 */
+	function get_domain( $name_or_id ) {
+		$domains = $this->domains;
+
+		if( is_numeric( $name_or_id ) ) {
+			return isset( $domains[$name_or_id] ) ? $domains[$name_or_id] : false;
+		} else {
+			foreach( $domains as $domain ) {
+				if( $domain['domain_name'] == $name_or_id )
+					return $domain;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Remove one domain from the list.
@@ -379,11 +402,11 @@ class multi_domain {
 					echo '<div id="message" class="error"><p>' . __( 'Error : the domains were not deleted', $this->textdomain ) . '</p></div>';
 
 			endif;
-?>
+			?>
 
-<div class="wrap" style="position: relative">
+			<div class="wrap" style="position: relative">
 
-<?php
+			<?php
 			$action = isset( $_GET['action'] ) ? $_GET['action'] : '';
 			switch( $action ) {
 				default:
@@ -416,30 +439,22 @@ class multi_domain {
 				<table cellspacing="3" cellpadding="3" width="100%" class="widefat">
 					<thead>
 						<tr>
-							<th class="column-cb check-column" scope="col"><input type="checkbox" id="select_all"></th>
-							<th scope="col"><?php _e ( 'Domain', $this->textdomain ) ?></th>
-							<th scope="col"><?php _e ( 'Status', $this->textdomain ) ?></th>
+							<?php $this->print_column_headers(); ?>
 						</tr>
 					</thead>
 					<tfoot>
 						<tr>
-							<th class="column-cb check-column" scope="col"><input type="checkbox" id="select_all"></th>
-							<th scope="col"><?php _e ( 'Domain', $this->textdomain ) ?></th>
-							<th scope="col"><?php _e ( 'Status', $this->textdomain ) ?></th>
+							<?php $this->print_column_headers(); ?>
 						</tr>
 					</tfoot>
 					<tbody>
-<?php if( !empty( $this->domains ) ): foreach( $this->domains as $domain ): ?>
-						<tr>
-							<th style="width: auto;" class="check-column" scope="row"><input type="checkbox" value="<?php echo $domain['domain_name'] ?>" name="domains[]" id="2"><label for="2"></label></th>
-							<td><?php echo $domain['domain_name'] ?>
-								<div class="row-actions">
-									<a title="<?php _e ( 'Edit this domain', $this->textdomain ) ?>" href="ms-admin.php?page=multi-domains&edit=1&name=<?php echo $domain['domain_name'] ?>&status=<?php echo $domain['domain_status'] ?>" class="edit">Edit</a> | <a title="<?php _e ( 'Delete this domain', $this->textdomain ) ?>" href="ms-admin.php?page=multi-domains&delete=1&name=<?php echo $domain['domain_name'] ?>" class="delete">Delete</a>
-								</div>
-							</td>
-							<td><?php echo $domain['domain_status'] ?></td>
-						</tr>
-<?php endforeach; endif; ?>
+						<?php
+						if( !empty( $this->domains ) ) {
+							foreach( $this->domains as $domain ) {
+								$this->domain_row( $domain );
+							}
+						}
+						?>
 					</tbody>
 				</table>
 				<div class="tablenav">
@@ -487,11 +502,10 @@ class multi_domain {
 		<div id="col-left">
 
 		<?php
-		if( isset( $_GET['edit'] ) ) {
+		if( isset( $_GET['edit'] ) )
 			$this->edit_domain_form();
-		} else {
+		else
 			$this->add_domain_form();
-		}
 		?>
 
 		</div><!-- #col-left -->
@@ -508,19 +522,84 @@ class multi_domain {
 <?php
 	}
 
+	/**
+	 * Column headers for domains table.
+	 */
+	function get_column_headers() {
+		$columns = array(
+			'cb'     => __( 'Checkbox', $this->textdomain ),
+			'domain' => __( 'Domain', $this->textdomain ),
+			'status' => __( 'Status', $this->textdomain )
+		);
+
+		return apply_filters( 'manage_multi_domains_columns', $columns );
+	}
+
+	/**
+	 * Display column headers in domains table.
+	 */
+	function print_column_headers() {
+		foreach( $this->get_column_headers() as $column_name => $column_display_name ) {
+			if( 'cb' == $column_name )
+				echo '<th class="column-cb check-column" scope="col"><input type="checkbox" id="select_all"></th>';
+			else
+				echo "<th scope='col' class='$column_name'>$column_display_name</th>";
+		}
+	}
+
+	/**
+	 * Display rows in domains table.
+	 */
+	function domain_row( $domain ) {
+		echo '<tr>';
+
+		foreach( $this->get_column_headers() as $column_name => $column_display_name ) {
+			switch ( $column_name ) {
+				case 'cb':
+				?>
+				<th style="width: auto;" class="check-column" scope="row"><input type="checkbox" value="<?php echo $domain['domain_name'] ?>" name="domains[]" id="2"><label for="2"></label></th>
+				<?php
+				break;
+
+				case 'domain':
+				?>
+				<td><?php echo $domain['domain_name'] ?>
+					<div class="row-actions">
+						<a title="<?php _e ( 'Edit this domain', $this->textdomain ) ?>" href="ms-admin.php?page=multi-domains&edit=1&name=<?php echo $domain['domain_name']; ?>" class="edit">Edit</a> | <a title="<?php _e ( 'Delete this domain', $this->textdomain ) ?>" href="ms-admin.php?page=multi-domains&delete=1&name=<?php echo $domain['domain_name'] ?>" class="delete">Delete</a>
+					</div>
+				</td>
+				<?php
+				break;
+
+				case 'status':
+				?>
+				<td><?php echo $domain['domain_status'] ?></td>
+				<?php
+				break;
+
+				default:
+				?>
+				<td><?php do_action( 'manage_multi_domains_custom_column', $column_name, $domain ); ?></td>
+				<?php
+				break;
+			}
+		}
+
+		echo '</tr>';
+	}
 
 	/**
 	 * Process domain addition form data.
 	 */
 	function add_domain_post() {
-		if( isset( $_POST['add_domain'] ) && isset( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ) {
+		if( isset( $_POST['add_domain'] ) && !empty( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ) {
 			unset( $_POST['add_domain'] );
 			$result = $this->add_domain( $_POST );
 			if ( is_wp_error( $result ) ) {
 				return $result->get_error_message();
 			} else {
 				$this->update_domains_option();
-				return sprintf( __( "The domain %s has been successfully added.", $this->textdomain ), $_POST['domain_name'] );
+				return sprintf( __( 'The domain %s has been successfully added.', $this->textdomain ), $_POST['domain_name'] );
 			}
 		}
 	}
@@ -530,11 +609,11 @@ class multi_domain {
 	 * Domain addition form.
 	 */
 	function add_domain_form() {
-		if( is_subdomain_install() ) {
+		if( is_subdomain_install() )
 			$sites_format = 'blogname.domain1.com, blogname.domain2.com';
-		} else {
+		else
 			$sites_format = 'domain1.com/blogname, domain2.com/blogname';
-		}
+
 		echo '<p>' . sprintf( __( 'This feature allows you to set multiple domains that users can run their sites from, for example you can allow a user to run a site at %s and so on - all on this one Multisite install.', $this->textdomain ), $sites_format ) . '</p>';
 ?>
 
@@ -557,11 +636,12 @@ class multi_domain {
 								}
 								?>
 							</select><br />
-			<span class="description"><?php _e( 'Public: available to all users', $this->textdomain ) ?><br />
-			<?php if( $this->show_restricted_domains() == true ) echo __( 'Restricted: available only to users which have special permission', $this->textdomain ) . '<br />'; ?>
-			<?php _e( 'Private: available only to Super Admins', $this->textdomain ) ?></span>
+							<span class="description"><?php _e( 'Public: available to all users', $this->textdomain ) ?><br />
+							<?php if( $this->show_restricted_domains() == true ) echo __( 'Restricted: available only to users which have special permission', $this->textdomain ) . '<br />'; ?>
+							<?php _e( 'Private: available only to Super Admins', $this->textdomain ) ?></span>
 						</td>
 					</tr>
+					<?php do_action( 'add_multi_domain_form_field' ); ?>
 				</tbody>
 			</table>
 			<p class="submit">
@@ -592,6 +672,10 @@ class multi_domain {
 	 * Domain edition form.
 	 */
 	function edit_domain_form() {
+		if( !isset( $_GET['name'] ) )
+			return;
+
+		$domain = $this->get_domain( $_GET['name'] );
 ?>
 		<h3><?php _e( 'Edit Domain', $this->textdomain ) ?></h3>
 
@@ -600,21 +684,21 @@ class multi_domain {
 				<tbody>
 					<tr>
 						<th scope="row"><label for="domain_name"><?php _e( 'Domain Name', $this->textdomain ) ?>:</label></th>
-						<td>http://<input type="text" name="domain_name" id="domain_name" title="<?php _e( 'The domain name', $this->textdomain ) ?>" value="<?php echo isset($_GET['name']) ? $_GET['name'] : ''  ?>" /></td>
+						<td>http://<input type="text" name="domain_name" id="domain_name" title="<?php _e( 'The domain name', $this->textdomain ) ?>" value="<?php echo $domain['domain_name'];  ?>" /></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="domain_status"><?php _e( 'Domain Status', $this->textdomain ) ?>:</label></th>
 						<td>
 							<select id="domain_status" name="domain_status">
 								<?php
-								$status = isset($_GET['status']) ? $_GET['status'] : '';
 								foreach( $this->domain_status() as $status_name ) {
-									echo '<option value="' . $status_name . '" ' . selected( $status, $status_name ) . '>' . $status_name . '</option>';
+									echo '<option value="' . $status_name . '" ' . selected( $domain['domain_status'], $status_name ) . '>' . $status_name . '</option>';
 								}
 								?>
 							</select>
 						</td>
 					</tr>
+					<?php do_action( 'edit_multi_domain_form_field', $domain ); ?>
 				</tbody>
 			</table>
 			<p class="submit">
@@ -759,7 +843,7 @@ class multi_domain {
 	function extend_admin_blogform() {
 		global $pagenow;
 
-		if( $pagenow !== 'ms-sites.php' || isset( $_GET['action'] ) && $_GET['action'] !== 'list' )
+		if( 'ms-sites.php' !== $pagenow || isset( $_GET['action'] ) && 'editblog' == $_GET['action'] )
 			return;
 
 		if( is_subdomain_install() ) {
@@ -965,7 +1049,7 @@ class multi_domain {
 			$url = 'http://' . $domains->domain . $domains->path;
 		}
 
-		if($url) {
+		if( $url ) {
 			$key = get_blog_option( $userblog_id, 'cross_domain', 'none' );
 			if( $key == 'none' ) $key = array();
 

@@ -5,6 +5,16 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+1.1 - 12/19/2010
+----------------------------------------------------------------------
+- Enhancement: More extensible code with new hooks and structure
+- Bug fix: Allow www in mapped domain name
+
+1.0.9 - 11/15/2010
+----------------------------------------------------------------------
+- Enhancement: Better compatibility with Domain Mapping for subdomain
+installs
+
 1.0.8 - 11/09/2010
 ----------------------------------------------------------------------
 - Enhancement: Keep selected domain after signup error
