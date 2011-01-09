@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.1
+Version: 1.2
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -30,6 +30,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+if( !is_multisite() )
+	exit( __( 'The Multi-Domains plugin is only compatible with WordPress Multisite.', 'multi_domain' ) );
+
+if( !defined( 'MULTI_DOMAIN_CROSS_DOMAIN_COOKIES' ) )
+	define( 'MULTI_DOMAIN_CROSS_DOMAIN_COOKIES', true );
+
 class multi_domain {
 
 	/**
@@ -40,7 +46,7 @@ class multi_domain {
 	/**
 	* @var string $version Plugin version
 	*/
-	var $version = '1.1';
+	var $version = '1.2';
 
 	/**
 	* @var string $pluginpath Path to plugin files
@@ -136,13 +142,17 @@ class multi_domain {
 	 * Run plugin functions.
 	 */
 	function setup_plugin() {
+		global $wp_version;
 
 		$this->handle_translation();
 
 		$this->domains = get_site_option( 'md_domains' );
 
 		// Add the super admin page
-		add_action( 'admin_menu', array( &$this, 'add_page' ) );
+		if( version_compare( $wp_version , '3.0.9', '>' ) )
+			add_action( 'network_admin_menu', array( &$this, 'network_admin_page' ) );
+		else
+			add_action( 'admin_menu', array( &$this, 'pre_3_1_network_admin_page' ) );
 
 		// Enqueue javascript
 		$this->enqueue_jquery();
@@ -165,8 +175,10 @@ class multi_domain {
 		add_action( 'admin_footer', array( &$this, 'extend_admin_blogform' ) ); // admin site creation form
 
 		// Cross domain cookies
-		add_action( 'admin_head', array( &$this, 'build_cookie' ) );
-		add_action( 'login_head', array( &$this, 'build_logout_cookie' ) );
+		if( MULTI_DOMAIN_CROSS_DOMAIN_COOKIES ) {
+			add_action( 'admin_head', array( &$this, 'build_cookie' ) );
+			add_action( 'login_head', array( &$this, 'build_logout_cookie' ) );
+		}
 
 		// modify blog columns on Super Admin > Sites page
 		add_filter( 'wpmu_blogs_columns', array( &$this, 'blogs_columns' ) );
@@ -188,14 +200,18 @@ class multi_domain {
 
 	}
 
+	/**
+	 * Add network admin page
+	 **/
+	function network_admin_page() {
+		add_submenu_page( 'settings.php', __( 'Multi-Domains', $this->textdomain ), __( 'Multi-Domains', $this->textdomain ), 'manage_network', 'multi-domains', array( &$this, 'management_page' ) );
+	}
 
 	/**
-	 * Add super admin page.
-	 */
-	function add_page() {
-
+	 * Add network admin page the old way
+	 **/
+	function pre_3_1_network_admin_page() {
 		add_submenu_page( 'ms-admin.php', __( 'Multi-Domains', $this->textdomain ), __( 'Multi-Domains', $this->textdomain ), 'manage_network', 'multi-domains', array( &$this, 'management_page' ) );
-
 	}
 
 
@@ -1125,4 +1141,16 @@ class multi_domain {
 
 $multi_dm =& new multi_domain();
 
-?>
+
+/**
+ * Show notification if WPMUDEV Update Notifications plugin is not installed
+ **/
+if ( !function_exists( 'wdp_un_check' ) ) {
+	add_action( 'admin_notices', 'wdp_un_check', 5 );
+	add_action( 'network_admin_notices', 'wdp_un_check', 5 );
+
+	function wdp_un_check() {
+		if ( !class_exists( 'WPMUDEV_Update_Notifications' ) && current_user_can( 'edit_users' ) )
+			echo '<div class="error fade"><p>' . __('Please install the latest version of <a href="http://premium.wpmudev.org/project/update-notifications/" title="Download Now &raquo;">our free Update Notifications plugin</a> which helps you stay up-to-date with the most stable, secure versions of WPMU DEV themes and plugins. <a href="http://premium.wpmudev.org/wpmu-dev/update-notifications-plugin-information/">More information &raquo;</a>', 'wpmudev') . '</a></p></div>';
+	}
+}
