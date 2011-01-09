@@ -33,8 +33,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 if( !is_multisite() )
 	exit( __( 'The Multi-Domains plugin is only compatible with WordPress Multisite.', 'multi_domain' ) );
 
-if( !defined( 'MULTI_DOMAIN_CROSS_DOMAIN_COOKIES' ) )
-	define( 'MULTI_DOMAIN_CROSS_DOMAIN_COOKIES', true );
+if( !defined( 'MULTI_DOMAIN_SINGLE_SIGNON' ) )
+	define( 'MULTI_DOMAIN_SINGLE_SIGNON', true );
 
 class multi_domain {
 
