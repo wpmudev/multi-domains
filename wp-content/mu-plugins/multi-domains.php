@@ -175,7 +175,7 @@ class multi_domain {
 		add_action( 'admin_footer', array( &$this, 'extend_admin_blogform' ) ); // admin site creation form
 
 		// Cross domain cookies
-		if( MULTI_DOMAIN_CROSS_DOMAIN_COOKIES ) {
+		if( MULTI_DOMAIN_SINGLE_SIGNON ) {
 			add_action( 'admin_head', array( &$this, 'build_cookie' ) );
 			add_action( 'login_head', array( &$this, 'build_logout_cookie' ) );
 		}
