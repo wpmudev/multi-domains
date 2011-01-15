@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.1.1
+Version: 1.1.2
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -46,7 +46,7 @@ class multi_domain {
 	/**
 	* @var string $version Plugin version
 	*/
-	var $version = '1.1.1';
+	var $version = '1.1.2';
 
 	/**
 	* @var string $pluginpath Path to plugin files
@@ -87,6 +87,9 @@ class multi_domain {
 
 		// Redirect from custom domain to network homepage
 		add_action( 'init', array( &$this, 'domain_redirect' ) );
+
+		// Enable or disable single signon
+		add_action( 'init', array( &$this, 'switch_single_signon' ) );
 
 		// Run plugin functions
 		add_action( 'init', array( &$this, 'setup_plugin' ) );
@@ -175,7 +178,7 @@ class multi_domain {
 		add_action( 'admin_footer', array( &$this, 'extend_admin_blogform' ) ); // admin site creation form
 
 		// Cross domain cookies
-		if( MULTI_DOMAIN_SINGLE_SIGNON ) {
+		if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) {
 			add_action( 'admin_head', array( &$this, 'build_cookie' ) );
 			add_action( 'login_head', array( &$this, 'build_logout_cookie' ) );
 		}
@@ -417,6 +420,12 @@ class multi_domain {
 				else
 					echo '<div id="message" class="error"><p>' . __( 'Error : the domains were not deleted', $this->textdomain ) . '</p></div>';
 
+			elseif( !empty( $_GET['single_signon'] ) ):
+				if( 'enable' == $_GET['single_signon'] )
+					echo '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on enabled.', $this->textdomain ) . '</p></div>';
+				elseif( 'disable' == $_GET['single_signon'] )
+					echo '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on disabled.', $this->textdomain ) . '</p></div>';
+
 			endif;
 			?>
 
@@ -444,7 +453,7 @@ class multi_domain {
 
 		<div id="col-right">
 
-			<form method="post" action="ms-admin.php?page=multi-domains" name="formlist">
+			<form method="post" action="?page=multi-domains" name="formlist">
 				<input type="hidden" name="action" value="deletedomains" />
 				<div class="tablenav">
 					<p class="alignleft">
@@ -511,7 +520,15 @@ class multi_domain {
 				echo '<p>Change the DNS records for each domain to point to this WordPress installation.</p>';
 				endif;
 				?>
-			</form>
+			</form><br />
+
+			<h3><?php _e( 'Single Signon', $this->textdomain ) ?></h3>
+			<p>The Single Sign-on feature synchronize login cookies on all the domains.</p>
+			<?php if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) { ?>
+				<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary">Disable Single Sign-on</a></p>
+			<?php } else { ?>
+				<p><a href="?page=multi-domains&single_signon=enable" class="button-secondary">Enable Single Sign-on</a></p>
+			<?php } ?>
 
 		</div><!-- #col-right -->
 
@@ -536,6 +553,20 @@ class multi_domain {
 </div><!-- .wrap -->
 
 <?php
+	}
+
+	/**
+	 * Enable or disable single signon
+	 **/
+	function switch_single_signon() {
+
+		if( isset( $_GET['page'] ) && 'multi-domains' == $_GET['page'] && !empty( $_GET['single_signon'] ) ) {
+			if( 'enable' == $_GET['single_signon'] ) {
+				update_site_option( 'multi_domains_single_signon', 'enabled' );
+			} else {
+				update_site_option( 'multi_domains_single_signon', 'disabled' );
+			}
+		}
 	}
 
 	/**
@@ -581,7 +612,7 @@ class multi_domain {
 				?>
 				<td><?php echo $domain['domain_name'] ?>
 					<div class="row-actions">
-						<a title="<?php _e ( 'Edit this domain', $this->textdomain ) ?>" href="ms-admin.php?page=multi-domains&edit=1&name=<?php echo $domain['domain_name']; ?>" class="edit">Edit</a> | <a title="<?php _e ( 'Delete this domain', $this->textdomain ) ?>" href="ms-admin.php?page=multi-domains&delete=1&name=<?php echo $domain['domain_name'] ?>" class="delete">Delete</a>
+						<a title="<?php _e ( 'Edit this domain', $this->textdomain ) ?>" href="?page=multi-domains&edit=1&name=<?php echo $domain['domain_name']; ?>" class="edit">Edit</a> | <a title="<?php _e ( 'Delete this domain', $this->textdomain ) ?>" href="?page=multi-domains&delete=1&name=<?php echo $domain['domain_name'] ?>" class="delete">Delete</a>
 					</div>
 				</td>
 				<?php
@@ -635,7 +666,7 @@ class multi_domain {
 
 		<h3><?php _e( 'Add Domain', $this->textdomain ) ?></h3>
 
-		<form id="domain-add" method="post" action="ms-admin.php?page=multi-domains&action=adddomain">
+		<form id="domain-add" method="post" action="?page=multi-domains&action=adddomain">
 			<table class="form-table">
 				<tbody>
 					<tr>
@@ -661,7 +692,7 @@ class multi_domain {
 				</tbody>
 			</table>
 			<p class="submit">
-				<input type="submit" class="button" name="add_domain" value="<?php _e( 'Add Domain', $this->textdomain ) ?>" />
+				<input type="submit" class="button-primary" name="add_domain" value="<?php _e( 'Add Domain', $this->textdomain ) ?>" />
 			</p>
 		</form>
 <?php
@@ -695,7 +726,7 @@ class multi_domain {
 ?>
 		<h3><?php _e( 'Edit Domain', $this->textdomain ) ?></h3>
 
-		<form id="domain-edit" method="post" action="ms-admin.php?page=multi-domains&action=editdomain">
+		<form id="domain-edit" method="post" action="?page=multi-domains&action=editdomain">
 			<table class="form-table">
 				<tbody>
 					<tr>
@@ -718,7 +749,7 @@ class multi_domain {
 				</tbody>
 			</table>
 			<p class="submit">
-				<input type="submit" class="button" name="edit_domain" value="<?php _e( 'Save Domain', $this->textdomain ) ?>" />
+				<input type="submit" class="button-primary" name="edit_domain" value="<?php _e( 'Save Domain', $this->textdomain ) ?>" />
 			</p>
 		</form>
 <?php
@@ -857,9 +888,15 @@ class multi_domain {
 	* Adds domain choice to the Super Admin New Site form
 	*/
 	function extend_admin_blogform() {
-		global $pagenow;
+		global $pagenow, $wp_version;
 
-		if( 'ms-sites.php' !== $pagenow || isset( $_GET['action'] ) && 'editblog' == $_GET['action'] )
+		if( version_compare( $wp_version, '3.0.9', '>' ) )
+			$sites_page = 'site-new.php';
+		else
+			$sites_page = 'ms-sites.php';
+
+
+		if( $sites_page !== $pagenow || isset( $_GET['action'] ) && 'editblog' == $_GET['action'] )
 			return;
 
 		if( is_subdomain_install() ) {
