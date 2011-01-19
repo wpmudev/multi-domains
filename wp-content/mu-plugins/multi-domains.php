@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.1.2
+Version: 1.1.3
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -33,9 +33,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 if( !is_multisite() )
 	exit( __( 'The Multi-Domains plugin is only compatible with WordPress Multisite.', 'multi_domain' ) );
 
-if( !defined( 'MULTI_DOMAIN_SINGLE_SIGNON' ) )
-	define( 'MULTI_DOMAIN_SINGLE_SIGNON', true );
-
 class multi_domain {
 
 	/**
@@ -46,7 +43,7 @@ class multi_domain {
 	/**
 	* @var string $version Plugin version
 	*/
-	var $version = '1.1.2';
+	var $version = '1.1.3';
 
 	/**
 	* @var string $pluginpath Path to plugin files
@@ -84,9 +81,6 @@ class multi_domain {
 
 		// Set plugin default options if the plugin was not installed before
 		add_action( 'init', array( &$this, 'activate_plugin' ) );
-
-		// Redirect from custom domain to network homepage
-		add_action( 'init', array( &$this, 'domain_redirect' ) );
 
 		// Enable or disable single signon
 		add_action( 'init', array( &$this, 'switch_single_signon' ) );
@@ -165,9 +159,11 @@ class multi_domain {
 		add_action( 'signup_hidden_fields', array( &$this, 'modify_current_site' ) );
 		// Populate $current_site, $domain and $base globals on signup page with values choosen by the user on signup page
 		add_filter( 'newblogname', array( &$this, 'set_registration_globals' ) );
+		add_action( 'admin_action_add-site', array( &$this, 'set_registration_globals' ) ); // For when the site is created from network admin
 		add_filter( 'add_signup_meta', array( &$this, 'set_other_registration_globals' ) );
 		// Restore default $current_site global on signup page
 		add_action( 'signup_finished', array( &$this, 'restore_current_site' ) );
+		add_action( 'wpmu_new_blog', array( &$this, 'restore_current_site' ) );
 
 		// Populate $current_site on admin edit page
 		add_action( 'wpmuadminedit', array( &$this, 'wpmuadminedit' ) );
@@ -179,8 +175,9 @@ class multi_domain {
 
 		// Cross domain cookies
 		if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) {
+			add_action( 'wp_loaded', array( &$this, 'maybe_logout_user' ) );
 			add_action( 'admin_head', array( &$this, 'build_cookie' ) );
-			add_action( 'login_head', array( &$this, 'build_logout_cookie' ) );
+			add_action( 'check_admin_referer', array( &$this, 'build_logout_cookie' ) );
 		}
 
 		// modify blog columns on Super Admin > Sites page
@@ -510,7 +507,7 @@ class multi_domain {
 							echo ' ' . sprintf( __( 'This resulted in an error message: %s', $this->textdomain ), '<code>' . $errstr . '</code>' );
 						$result .= '</p></div>';
 					}
-					set_transient( 'wp_hostname_' . $domain['domain_name'] , $result);
+					set_transient( 'wp_hostname_' . $domain['domain_name'] , $result, 60 * 15 );
 				}
 				echo $result;
 
@@ -1031,35 +1028,60 @@ class multi_domain {
 		}
 	}
 
-
 	/**
-	 * 301 redirect from custom domain to network homepage.
+	 * Log user out if value set in database.
 	 */
-	function domain_redirect() {
+	function maybe_logout_user() {
+		$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
+		$key = get_site_option( "multi_domains_cross_domain_$dom" );
+		$hash = md5( AUTH_KEY . 'multi_domains' );
 
-		global $current_site;
-		if( $_SERVER['REQUEST_URI'] == '/' && $_SERVER['HTTP_HOST'] !== $current_site->domain ) {
-			foreach ( $this->domains as $domain ) {
-				if( $_SERVER['HTTP_HOST'] == $domain['domain_name'] )
-					wp_redirect( apply_filters( 'md_domain_redirect', network_home_url() ), 301 );
+		if ( is_user_logged_in() ) {
+			$user = wp_get_current_user();
+			$user_id = $user->ID;
+
+			if( array_key_exists( $user_id, (array) $key ) ) {
+				switch($key[$user_id]['action']) {
+					case 'logout':
+						wp_clear_auth_cookie();
+
+						delete_transient( "multi_domains_{$dom}_$user_id" );
+
+						unset( $key[$user_id] );
+						update_site_option( "multi_domains_cross_domain_$dom", (array) $key );
+
+						if ( is_ssl() )
+							$proto = 'https://';
+						else
+							$proto = 'http://';
+
+						$redirect = ( strpos($_SERVER['REQUEST_URI'], '/options.php') && wp_get_referer() ) ? wp_get_referer() : $proto . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+						$login_url = wp_login_url( $redirect, true );
+						wp_redirect( $login_url );
+						exit();
+
+						break;
+					default:
+						break;
+				}
 			}
 		}
-
 	}
-
 
 	/**
 	 * Build logout cookie.
 	 */
-	function build_logout_cookie() {
-
-		if( isset( $_GET['loggedout'] ) ) {
-			// Log out CSS
+	function build_logout_cookie( $action ) {
+		if ( 'log-out' == $action ) {
 			$this->build_cookie( 'logout' );
+
+			$user = wp_get_current_user();
+			$user_id = $user->ID;
+			unset( $key[$user_id] );
+			update_site_option( "multi_domains_cross_domain_$dom", (array) $key );
 		}
-
 	}
-
 
 	/**
 	 * Build login cookie.
@@ -1067,22 +1089,20 @@ class multi_domain {
 	function build_cookie( $action = 'login' ) {
 
 		$user = wp_get_current_user();
-		$hash = md5( AUTH_KEY . time() . 'COOKIEMONSTER' );
 
 		$blogs = get_blogs_of_user( $user->ID );
 		if ( is_array( $blogs ) ) {
 			foreach ( (array) $blogs as $key => $val ) {
-				$this->build_blog_cookie( $action, $hash, $val->userblog_id );
+				$this->build_blog_cookie( $action, $val->userblog_id );
 			}
 		}
 
 	}
 
-
 	/**
 	 * Build login cookie.
 	 */
-	function build_blog_cookie( $action = 'login', $hash = '', $userblog_id = ''  ) {
+	function build_blog_cookie( $action = 'login', $userblog_id = ''  ) {
 
 		global $blog_id;
 
@@ -1093,34 +1113,38 @@ class multi_domain {
 		if ( class_exists( 'domain_map' ) && defined( 'DOMAIN_MAPPING' ) ) {
 			$domain = $this->db->get_var( "SELECT domain FROM {$this->db->dmtable} WHERE blog_id = '{$userblog_id}' ORDER BY id LIMIT 1" );
 			if($domain) {
-				$dom = $domain;
+				$dom = str_replace( '.', '', $domain );
 				$url = 'http://' . $domain . '/';
 			}
 		} else {
 			$domains = $this->db->get_row( "SELECT domain, path FROM {$this->db->blogs} WHERE blog_id = '{$userblog_id}' LIMIT 1" );
-			$dom = $domains->domain;
+			$dom = str_replace( '.', '', $domains->domain );
 			$url = 'http://' . $domains->domain . $domains->path;
 		}
 
 		if( $url ) {
-			$key = get_blog_option( $userblog_id, 'cross_domain', 'none' );
-			if( $key == 'none' ) $key = array();
+			$key = get_site_option( "multi_domains_cross_domain_$dom", array() );
 
 			$user = wp_get_current_user();
 
-			if( !array_key_exists( $hash, (array) $key ) ) {
-				$key[$hash.$dom] = array (
-					"domain"	=> $url,
-					"hash"		=> $hash,
-					"user_id"	=> $user->ID,
-					"action"	=> $action
+			$user_id = $user->id;
+
+			if( ! isset( $key[$user_id]['action'] ) || ( isset( $key[$user_id]['action'] ) && $key[$user_id]['action'] !== $action ) ) {
+				$key[$user_id] = array (
+					'domain'	=> $url,
+					'action'	=> $action
 				);
+
+				update_site_option( "multi_domains_cross_domain_$dom", $key );
 			}
 
-			update_blog_option( $userblog_id, 'cross_domain', $key );
+			$hash = md5( AUTH_KEY . 'multi_domains' );
 
-			if( $blog_id !== $userblog_id )
-				echo '<link rel="stylesheet" href="' . $url . $hash . '.css?build=' . date( "Ymd", strtotime( '-24 days' ) ) . '" type="text/css" media="screen" />';
+			if ( $blog_id !== $userblog_id && 'login' == $action && get_transient( "multi_domains_{$dom}_$user_id" ) !== 'add' ) {
+				echo '<link rel="stylesheet" href="' . $url . $hash . '.css?build=' . date( "Ymd", strtotime( '-24 days' ) ) . '&id=' . $user_id .'" type="text/css" media="screen" />';
+
+				set_transient( "multi_domains_{$dom}_$user_id", 'add', 60 * 15 );
+			}
 		}
 
 
@@ -1139,37 +1163,25 @@ class multi_domain {
 
 			// We have a stylesheet with a build and a matching date - so grab the hash
 			$url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH );
-			$hash = str_replace( '.css', '', basename( $url ) ) . $_SERVER[ 'HTTP_HOST' ];
+			$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
+			$hash_sent = str_replace( '.css', '', basename( $url ) );
+			$hash = md5( AUTH_KEY . 'multi_domains' );
 
-			$key = get_option( 'cross_domain' );
+			$user_id = $_GET['id'];
 
-			if( array_key_exists( $hash, (array) $key ) ) {
+			$key = get_site_option( "multi_domains_cross_domain_$dom" );
 
-				if( !is_user_logged_in() ) {
-					// Set the cookies
-					switch( $key[$hash]['action'] ) {
-						case 'login':
-							wp_set_auth_cookie($key[$hash]['user_id']);
-							break;
-						default:
-							break;
-					}
-
-				} else {
-					// Set the cookies
-					switch($key[$hash]['action']) {
-						case 'logout':
-							wp_clear_auth_cookie();
-							break;
-						default:
-							break;
-					}
+			if( array_key_exists( $user_id, (array) $key ) && !is_user_logged_in() && $hash_sent == $hash ) {
+				// Set the cookies
+				switch( $key[$user_id]['action'] ) {
+					case 'login':
+						wp_set_auth_cookie( $user_id );
+						break;
+					default:
+						break;
 				}
-				$url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_HOST );
-				unset( $key[$hash.$url] );
-				update_option( 'cross_domain', (array) $key );
-				die();
 			}
+
 			die();
 		}
 	}
