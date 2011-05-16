@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.1.3
+Version: 1.1.4
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -491,7 +491,7 @@ class multi_domain {
 				if( !empty( $this->domains ) ): foreach( $this->domains as $domain ): if( $domain['domain_name'] !== DOMAIN_CURRENT_SITE ):
 
 				$result = '';
-				if (false === ( $result = get_site_transient( 'multi_domains_host_' . $domain['domain_name'] ) ) ) {
+				if (false === ( $result = get_transient( 'wp_hostname_' . $domain['domain_name'] ) ) ) {
 					$host_ok = false;
 					$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain['domain_name']; // Very random hostname!
 					$page = wp_remote_get( 'http://' . $hostname, array( 'timeout' => 5, 'httpversion' => '1.1' ) );
@@ -507,7 +507,7 @@ class multi_domain {
 							echo ' ' . sprintf( __( 'This resulted in an error message: %s', $this->textdomain ), '<code>' . $errstr . '</code>' );
 						$result .= '</p></div>';
 					}
-					set_site_transient( 'multi_domains_host_' . $domain['domain_name'] , $result, 60 * 15 );
+					set_transient( 'wp_hostname_' . $domain['domain_name'] , $result, 60 * 15 );
 				}
 				echo $result;
 
@@ -1045,7 +1045,7 @@ class multi_domain {
 					case 'logout':
 						wp_clear_auth_cookie();
 
-						delete_site_transient( "multi_domains_{$dom}_$user_id" );
+						delete_transient( "multi_domains_{$dom}_$user_id" );
 
 						unset( $key[$user_id] );
 						update_site_option( "multi_domains_cross_domain_$dom", (array) $key );
@@ -1073,6 +1073,8 @@ class multi_domain {
 	 * Build logout cookie.
 	 */
 	function build_logout_cookie( $action ) {
+		$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
+		$key = get_site_option( "multi_domains_cross_domain_$dom" );
 		if ( 'log-out' == $action ) {
 			$this->build_cookie( 'logout' );
 
@@ -1140,10 +1142,10 @@ class multi_domain {
 
 			$hash = md5( AUTH_KEY . 'multi_domains' );
 
-			if ( $blog_id !== $userblog_id && 'login' == $action && get_site_transient( "multi_domains_{$dom}_$user_id" ) !== 'add' ) {
+			if ( $blog_id !== $userblog_id && 'login' == $action && get_transient( "multi_domains_{$dom}_$user_id" ) !== 'add' ) {
 				echo '<link rel="stylesheet" href="' . $url . $hash . '.css?build=' . date( "Ymd", strtotime( '-24 days' ) ) . '&id=' . $user_id .'" type="text/css" media="screen" />';
 
-				set_site_transient( "multi_domains_{$dom}_$user_id", 'add', 60 * 15 );
+				set_transient( "multi_domains_{$dom}_$user_id", 'add', 60 * 15 );
 			}
 		}
 
