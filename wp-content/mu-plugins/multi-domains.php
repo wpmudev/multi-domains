@@ -43,7 +43,7 @@ class multi_domain {
 	/**
 	* @var string $version Plugin version
 	*/
-	var $version = '1.1.3';
+	var $version = '1.1.4';
 
 	/**
 	* @var string $pluginpath Path to plugin files
