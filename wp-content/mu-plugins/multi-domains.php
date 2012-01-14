@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.1.4
+Version: 1.1.6
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -43,7 +43,7 @@ class multi_domain {
 	/**
 	* @var string $version Plugin version
 	*/
-	var $version = '1.1.4';
+	var $version = '1.1.5';
 
 	/**
 	* @var string $pluginpath Path to plugin files
@@ -827,7 +827,12 @@ class multi_domain {
 
 			$domain = $_POST['domain'];
 
-			$this->modify_current_site( $current_site );
+			//$this->modify_current_site( $current_site );
+			// This is just wrong on so many levels... but it seems to get the job done.
+			add_action('check_admin_referer', create_function(
+				'$action,$domain="' . $current_site->domain . '"',
+				'global $current_site; if ("add-site" == $action || "add-blog" == $action) $current_site->domain=$domain;'
+			), 10, 1);
 
 		}
 
@@ -867,6 +872,11 @@ class multi_domain {
 	 * Add domain choice to signup form.
 	 */
 	function extend_signup_blogform() {
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('md-placement', $this->pluginurl . '/js/placement.js', array('jquery'));
+		wp_localize_script('md-placement', 'l10nMd', array(
+			'your_address' => __('Your address will be'),
+		));
 		if( count( $domains = $this->domains ) > 1 ) {
 			echo '<select id="domain" name="domain">';
 				foreach( $domains as $domain ) {
@@ -1160,7 +1170,7 @@ class multi_domain {
 
 		if( isset( $_GET['build'] ) && addslashes( $_GET['build'] ) == date( "Ymd", strtotime( '-24 days' ) ) ) {
 			header("Content-type: text/css");
-			echo "/* Sometimes me think what is love, and then me think love is what last cookie is for. Me give up the last cookie for you. */";
+			//echo "/* Sometimes me think what is love, and then me think love is what last cookie is for. Me give up the last cookie for you. */";
 			define( 'DONOTCACHEPAGE', 1 ); // don't let wp-super-cache cache this page.
 
 			// We have a stylesheet with a build and a matching date - so grab the hash
