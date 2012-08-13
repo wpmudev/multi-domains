@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.1.6
+Version: 1.2
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -100,6 +100,8 @@ class multi_domain {
 			$this->pluginurl = WP_PLUGIN_URL . '/multi-domains/multi-domains-files/';
 		}
 
+		if (is_network_admin() && !(defined('MD_SKIP_SITE_SEARCH_QUERY_REWRITE') && MD_SKIP_SITE_SEARCH_QUERY_REWRITE)) add_filter('load-sites.php', array($this, 'add_network_sites_query_filter')); 
+
 	}
 
 	/**
@@ -107,6 +109,30 @@ class multi_domain {
 	*/
 	function multi_domain() {
 		$this->__construct();
+	}
+
+	function add_network_sites_query_filter () { 
+		if (is_subdomain_install()) add_filter('query', array($this, 'subdomain_filter_site_search_query')); 
+	}
+
+	function subdomain_filter_site_search_query ($query) {
+		// WP 3.3+ scoping
+		if (function_exists('get_current_screen')) {
+			$screen = get_current_screen();
+			if ('sites-network' != $screen->id) return $query; // Not a proper page
+		}
+
+		global $wpdb, $current_site, $s;
+		if (!preg_match('/' . preg_quote($wpdb->blogs . '.domain', '/') . '/', $query)) return $query;
+
+		$replacement = preg_match('/\./', $s) ? '\1%' : '\1.%'; // Rewrite scoping for full sub+domain searches
+		$query = preg_replace(
+			'/(\b|%)' . preg_quote(".{$current_site->domain}", '/') . '\b/', 
+			$replacement, 
+			$query
+		);
+
+		return $query;
 	}
 
 
@@ -177,6 +203,9 @@ class multi_domain {
 		if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) {
 			add_action( 'wp_loaded', array( &$this, 'maybe_logout_user' ) );
 			add_action( 'admin_head', array( &$this, 'build_cookie' ) );
+			if (defined('BP_VERSION')) {
+				add_action( 'wp_head', array( &$this, 'build_cookie' ) );
+			}
 			add_action( 'check_admin_referer', array( &$this, 'build_logout_cookie' ) );
 		}
 
@@ -873,7 +902,7 @@ class multi_domain {
 	 */
 	function extend_signup_blogform() {
 		wp_enqueue_script('jquery');
-		wp_enqueue_script('md-placement', $this->pluginurl . '/js/placement.js', array('jquery'));
+		if (!defined('MD_DEQUEUE_PLACEMENT') || !MD_DEQUEUE_PLACEMENT) wp_enqueue_script('md-placement', $this->pluginurl . '/js/placement.js', array('jquery'));
 		wp_localize_script('md-placement', 'l10nMd', array(
 			'your_address' => __('Your address will be'),
 		));
@@ -1055,7 +1084,7 @@ class multi_domain {
 					case 'logout':
 						wp_clear_auth_cookie();
 
-						delete_transient( "multi_domains_{$dom}_$user_id" );
+						delete_transient( "multi_domains_{$dom}_{$user_id}" );
 
 						unset( $key[$user_id] );
 						update_site_option( "multi_domains_cross_domain_$dom", (array) $key );
@@ -1083,8 +1112,10 @@ class multi_domain {
 	 * Build logout cookie.
 	 */
 	function build_logout_cookie( $action ) {
+	
 		$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
 		$key = get_site_option( "multi_domains_cross_domain_$dom" );
+
 		if ( 'log-out' == $action ) {
 			$this->build_cookie( 'logout' );
 
@@ -1133,7 +1164,7 @@ class multi_domain {
 			$dom = str_replace( '.', '', $domains->domain );
 			$url = 'http://' . $domains->domain . $domains->path;
 		}
-
+		
 		if( $url ) {
 			$key = get_site_option( "multi_domains_cross_domain_$dom", array() );
 
@@ -1152,10 +1183,10 @@ class multi_domain {
 
 			$hash = md5( AUTH_KEY . 'multi_domains' );
 
-			if ( $blog_id !== $userblog_id && 'login' == $action && get_transient( "multi_domains_{$dom}_$user_id" ) !== 'add' ) {
+			if ( $blog_id !== $userblog_id && 'login' == $action /*&& get_transient( "multi_domains_{$dom}_{$user_id}" ) !== 'add'*/ ) { // Removing transient check
 				echo '<link rel="stylesheet" href="' . $url . $hash . '.css?build=' . date( "Ymd", strtotime( '-24 days' ) ) . '&id=' . $user_id .'" type="text/css" media="screen" />';
 
-				set_transient( "multi_domains_{$dom}_$user_id", 'add', 60 * 15 );
+				set_transient( "multi_domains_{$dom}_{$user_id}", 'add', 60 * 15 );
 			}
 		}
 
