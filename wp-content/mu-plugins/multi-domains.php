@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.2
+Version: 1.2.1
 Network: true
 Text Domain: multi_domain
 Author: Ulrich SOSSOU (Incsub)
@@ -213,6 +213,32 @@ class multi_domain {
 		add_filter( 'wpmu_blogs_columns', array( &$this, 'blogs_columns' ) );
 		add_action( 'manage_blogs_custom_column', array( &$this, 'manage_blogs_custom_column' ), 10, 2 );
 
+		// Canonicalize main URL
+		if (defined('MD_CANONICAL_DOMAIN') && MD_CANONICAL_DOMAIN) {
+			// Removing default canonical action - note: custom SEO in themes
+			/// or plugins will override this behavior.
+			remove_action('wp_head', 'rel_canonical');
+			add_action('wp_head', array($this, 'canonicalize_main_domain'));
+		}
+
+	}
+
+	function canonicalize_main_domain () {
+		if (!(defined('MD_CANONICAL_DOMAIN') && MD_CANONICAL_DOMAIN)) return false; // Nothing to do
+
+		global $wp;
+		$link = site_url($wp->request);
+
+		foreach ($this->domains as $data) {
+			if (!preg_match('/' . preg_quote($data['domain_name'], '/') . '/i', $link)) continue;
+			$link = preg_replace('/' . preg_quote($data['domain_name'], '/') . '/i', MD_CANONICAL_DOMAIN, $link);
+			break;
+		}
+
+		$link = apply_filters('md-canonical_domain-replacement_link', $link);
+		if (!$link) return false;
+
+		echo "<link rel='canonical' href='$link' />\n";
 	}
 
 
@@ -821,10 +847,16 @@ class multi_domain {
 	function modify_current_site( $value = '' ) {
 		global $current_site;
 		$this->current_site = $current_site;
+		
+		/*
+		// Old, unreliable, no idea why it's doing this, don't do this
 		if( empty( $value ) ) {
 			$value->domain = '';
 		}
 		$current_site->domain = $value->domain;
+		*/
+
+		if (is_object($value) && isset($value->domain)) $current_site->domain = $value->domain;
 	}
 
 

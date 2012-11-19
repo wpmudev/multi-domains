@@ -8,7 +8,7 @@ var $suffix = false;
 function update_text () {
 	if (!$suffix || !$suffix.length) return;
 	var $strong = $suffix.find('~p').has("strong").find("strong");
-	if (!$strong) return;
+	if (!$strong.length) return;
 	
 	$strong.text(
 		l10nMd.your_address + ' ' + $name.val() + '.' + $domain.val()
@@ -16,7 +16,7 @@ function update_text () {
 }
 
 // Init
-if ($name.length && $domain.length) {
+if ($name.length && $domain.length && $domain.is("select")) {
 	$suffix = $name.next(".suffix_address");
 	if (!$suffix.length) return false;
 	 
