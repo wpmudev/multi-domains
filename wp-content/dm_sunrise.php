@@ -21,11 +21,12 @@ $wpdb->suppress_errors();
 
 $using_domain = $wpdb->escape( preg_replace( "/^www\./", "", $_SERVER[ 'HTTP_HOST' ] ) );
 
-$mapped_id = $wpdb->get_var( "SELECT blog_id FROM {$wpdb->dmtable} WHERE domain = '{$using_domain}' LIMIT 1 /* domain mapping */" );
+// Check for the domain with and without the www. prefix
+$mapped_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM {$wpdb->dmtable} WHERE domain = %s OR domain = %s LIMIT 1 /* domain mapping */", $using_domain, 'www.' . $using_domain ) );
 
 $wpdb->suppress_errors( false );
 
-if ( !$mapped_id && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $using_domain ) ) {
+if ( !empty($mapped_id) && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $using_domain ) ) {
 	$md_domains = unserialize( $wpdb->get_var( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key = 'md_domains' AND site_id = 1" ) );
 
 	if( $_SERVER['REQUEST_URI'] == '/' ) {
@@ -56,7 +57,7 @@ if ( !$mapped_id && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $u
 	}
 }
 
-if( $mapped_id ) {
+if( !empty($mapped_id) ) {
 	$current_blog = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->blogs WHERE blog_id = %d LIMIT 1 /* domain mapping */", $mapped_id ) );
 	$current_blog->domain = $_SERVER[ 'HTTP_HOST' ];
 
