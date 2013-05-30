@@ -70,6 +70,8 @@ if( !empty($mapped_id) ) {
 
 	$current_site->blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s /* domain mapping */", $current_site->domain, $current_site->path ) );
 
+	$current_site = get_current_site_name( $current_site );
+
 	$current_blog->path = $current_site->path;
 
 	define( 'DOMAIN_MAPPING', 1 );
