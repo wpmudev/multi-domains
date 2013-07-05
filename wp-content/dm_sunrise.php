@@ -26,7 +26,7 @@ $mapped_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM {$wpdb->dmtabl
 
 $wpdb->suppress_errors( false );
 
-if ( !empty($mapped_id) && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $using_domain ) ) {
+if ( empty($mapped_id) && ( preg_replace( "/^www\./", "", DOMAIN_CURRENT_SITE ) !== $using_domain ) ) {
 	$md_domains = unserialize( $wpdb->get_var( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key = 'md_domains' AND site_id = 1" ) );
 
 	if( $_SERVER['REQUEST_URI'] == '/' ) {
