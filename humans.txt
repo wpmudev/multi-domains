@@ -1,0 +1,9 @@
+/* TEAM */
+	Developer: Ulrich Sossou
+	Location: Cotonou, Benin
+	Twitter: @sorich87
+
+	Developer: Eugene Manuilov
+	Location: Kiev, Ukraine
+	Contact: eugene[at]incsub[dot]com
+	Twitter: @eugene_manuilov
