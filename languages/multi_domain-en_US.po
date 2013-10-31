@@ -1,0 +1,215 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Multi-Domains\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-01 00:03+0300\n"
+"PO-Revision-Date: 2013-11-01 00:04+0300\n"
+"Last-Translator: Eugene Manuilov <eugene@manuilov.org>\n"
+"Language-Team: Incsub <devs@incsub.com>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: esc_html__;esc_html_e;esc_attr__;__;_e;esc_attr_e;_n;"
+"_n_noop;_nc;_nx;_nx_noop\n"
+"X-Poedit-Basepath: ./../\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: multi-domains.php:35
+msgid "The Multi-Domains plugin is only compatible with WordPress Multisite."
+msgstr "The Multi-Domains plugin is only compatible with WordPress Multisite."
+
+#: multi-domains.php:47
+#, php-format
+msgid ""
+"Please install the latest version of %sour free Update Notifications plugin"
+"%s which helps you stay up-to-date with the most stable, secure versions of "
+"WPMU DEV themes and plugins. %sMore information%s"
+msgstr ""
+"Please install the latest version of %sour free Update Notifications plugin"
+"%s which helps you stay up-to-date with the most stable, secure versions of "
+"WPMU DEV themes and plugins. %sMore information%s"
+
+#: multi-domains.php:258 multi-domains.php:266
+msgid "Multi-Domains"
+msgstr "Multi-Domains"
+
+#: multi-domains.php:275 multi-domains.php:620
+msgid "Domain"
+msgstr "Domain"
+
+#: multi-domains.php:342
+#, php-format
+msgid "The domain %s is already in the list."
+msgstr "The domain %s is already in the list."
+
+#: multi-domains.php:368 multi-domains.php:412
+#, php-format
+msgid "The domain %s was not found in the list."
+msgstr "The domain %s was not found in the list."
+
+#: multi-domains.php:439
+msgid "You do not have permission to access this page."
+msgstr "You do not have permission to access this page."
+
+#: multi-domains.php:445
+msgid "Error : the domain was not added"
+msgstr "Error : the domain was not added"
+
+#: multi-domains.php:451
+msgid "Error : the domain was not saved"
+msgstr "Error : the domain was not saved"
+
+#: multi-domains.php:457
+msgid "Error : the domain was not deleted"
+msgstr "Error : the domain was not deleted"
+
+#: multi-domains.php:463
+msgid "Error : the domains were not deleted"
+msgstr "Error : the domains were not deleted"
+
+#: multi-domains.php:467
+msgid "Single Sign-on enabled."
+msgstr "Single Sign-on enabled."
+
+#: multi-domains.php:469
+msgid "Single Sign-on disabled."
+msgstr "Single Sign-on disabled."
+
+#: multi-domains.php:483
+msgid "Domains"
+msgstr "Domains"
+
+#: multi-domains.php:486
+#, php-format
+msgid ""
+"Please copy the sunrise.php to %swp-content/sunrise.php and uncomment the "
+"SUNRISE setting in the %swp-config.php file."
+msgstr ""
+"Please copy the sunrise.php to %swp-content/sunrise.php and uncomment the "
+"SUNRISE setting in the %swp-config.php file."
+
+#: multi-domains.php:490
+#, php-format
+msgid ""
+"Please uncomment the line <em>//define( 'SUNRISE', 'on' );</em> in the %swp-"
+"config.php file."
+msgstr ""
+"Please uncomment the line <em>//define( 'SUNRISE', 'on' );</em> in the %swp-"
+"config.php file."
+
+#: multi-domains.php:502 multi-domains.php:529
+msgid "Delete"
+msgstr "Delete"
+
+#: multi-domains.php:549
+#, php-format
+msgid "Warning! Wildcard DNS for %s may not be configured correctly!"
+msgstr "Warning! Wildcard DNS for %s may not be configured correctly!"
+
+#: multi-domains.php:550
+#, php-format
+msgid "Unable to contact the random hostname (<code>%s</code>)."
+msgstr "Unable to contact the random hostname (<code>%s</code>)."
+
+#: multi-domains.php:552
+#, php-format
+msgid "This resulted in an error message: %s"
+msgstr "This resulted in an error message: %s"
+
+#: multi-domains.php:567
+msgid "Single Signon"
+msgstr "Single Signon"
+
+#: multi-domains.php:619
+msgid "Checkbox"
+msgstr "Checkbox"
+
+#: multi-domains.php:621
+msgid "Status"
+msgstr "Status"
+
+#: multi-domains.php:657
+msgid "Edit this domain"
+msgstr "Edit this domain"
+
+#: multi-domains.php:657
+msgid "Delete this domain"
+msgstr "Delete this domain"
+
+#: multi-domains.php:691
+#, php-format
+msgid "The domain %s has been successfully added."
+msgstr "The domain %s has been successfully added."
+
+#: multi-domains.php:705
+#, php-format
+msgid ""
+"This feature allows you to set multiple domains that users can run their "
+"sites from, for example you can allow a user to run a site at %s and so on - "
+"all on this one Multisite install."
+msgstr ""
+"This feature allows you to set multiple domains that users can run their "
+"sites from, for example you can allow a user to run a site at %s and so on - "
+"all on this one Multisite install."
+
+#: multi-domains.php:708 multi-domains.php:736
+msgid "Add Domain"
+msgstr "Add Domain"
+
+#: multi-domains.php:714 multi-domains.php:772
+msgid "Domain Name"
+msgstr "Domain Name"
+
+#: multi-domains.php:715 multi-domains.php:773
+msgid "The domain name"
+msgstr "The domain name"
+
+#: multi-domains.php:718 multi-domains.php:776
+msgid "Domain Status"
+msgstr "Domain Status"
+
+#: multi-domains.php:727
+msgid "Public: available to all users"
+msgstr "Public: available to all users"
+
+#: multi-domains.php:728
+msgid "Restricted: available only to users which have special permission"
+msgstr "Restricted: available only to users which have special permission"
+
+#: multi-domains.php:729
+msgid "Private: available only to Super Admins"
+msgstr "Private: available only to Super Admins"
+
+#: multi-domains.php:752
+#, php-format
+msgid "The domain %s has been successfully modified."
+msgstr "The domain %s has been successfully modified."
+
+#: multi-domains.php:766
+msgid "Edit Domain"
+msgstr "Edit Domain"
+
+#: multi-domains.php:791
+msgid "Save Domain"
+msgstr "Save Domain"
+
+#: multi-domains.php:807
+#, php-format
+msgid "The domain %s has been successfully deleted."
+msgstr "The domain %s has been successfully deleted."
+
+#: multi-domains.php:823
+msgid "The domains have been successfully deleted."
+msgstr "The domains have been successfully deleted."
+
+#: multi-domains.php:919
+msgid "Your address will be"
+msgstr "Your address will be"
+
+#: multi-domains.php:958 multi-domains.php:971
+msgid "Only the characters a-z and 0-9 recommended."
+msgstr "Only the characters a-z and 0-9 recommended."
