@@ -73,6 +73,13 @@ class multi_domain {
 	var $version = '1.2.3';
 
 	/**
+	 * Sunrise version
+	 *
+	 * @var string
+	 */
+	var $sunrise = '1.0.0';
+
+	/**
 	 * Database object
 	 *
 	 * @var wpdb
@@ -97,10 +104,10 @@ class multi_domain {
 	 * Constructor
 	 */
 	function __construct() {
-
 		global $wpdb;
 
 		$this->db = $wpdb;
+		$this->upgrade_sunrise();
 
 		// Set plugin default options if the plugin was not installed before
 		add_action( 'init', array( $this, 'activate_plugin' ) );
@@ -121,13 +128,13 @@ class multi_domain {
 		// WP 3.3+ scoping
 		if ( function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
-			if ( 'sites-network' != $screen->id ) {
+			if ( !$screen || 'sites-network' != $screen->id ) {
 				return $query; // Not a proper page
 			}
 		}
 
-		global $wpdb, $current_site, $s;
-		if ( !preg_match( '/' . preg_quote( $wpdb->blogs . '.domain', '/' ) . '/', $query ) ) {
+		global $current_site, $s;
+		if ( !preg_match( '/' . preg_quote( $this->db->blogs . '.domain', '/' ) . '/', $query ) ) {
 			return $query;
 		}
 
@@ -1224,6 +1231,65 @@ class multi_domain {
 			}
 
 			die();
+		}
+	}
+
+	/**
+	 * Upgrades sunrise.php file if need be.
+	 */
+	function upgrade_sunrise() {
+		// if sunrise.php has the latest version, then return
+		$defined = defined( 'MULTIDOMAINS_SUNRISE_VERSION' );
+		if ( $defined && version_compare( MULTIDOMAINS_SUNRISE_VERSION, $this->sunrise, '=' ) ) {
+			return;
+		}
+
+		$global_sunrise = WP_CONTENT_DIR . '/sunrise.php';
+		$local_sunrise = dirname( __FILE__ ) . '/sunrise.php';
+
+		// return if local sunrise.php file is not readable
+		if ( !is_readable( $local_sunrise ) ) {
+			return;
+		}
+
+		// copy new sunrise.php file or upgrade existing one
+		if ( file_exists( $global_sunrise ) ) {
+			// return if we can't write into sunrise.php file
+			if ( !is_writable( $global_sunrise ) ) {
+				return;
+			}
+
+			$global_content = file_get_contents( $global_sunrise );
+			$local_content = file_get_contents( $local_sunrise );
+			$pattern = sprintf( '/%s.*?%s/is', preg_quote( 'function multi_domains_sunrise()', '/' ), preg_quote( 'multi_domains_sunrise();', '/' ) );
+
+			$found = preg_match( $pattern, $local_content, $matches );
+
+			// files is already exists, update it
+			if ( $defined ) {
+				// if version was defined but is deprecated, then replace old content on new content
+				if ( preg_match( $pattern, $local_content, $matches ) ) {
+					$global_content = preg_replace( $pattern, $matches[0], $global_content );
+				}
+			} else {
+				// version wasn't defined, so check if domain mapping was defined
+				if ( preg_match( "/\'DOMAIN_MAPPING\'/m", $global_content ) ) {
+					// check if it is old version of dm_sunrise.php file
+					if ( preg_match( "/\'md_domains\'/m", $global_content ) ) {
+						$global_content = $local_content;
+					} elseif ( preg_match( $pattern, $local_content, $matches ) ) {
+						$global_content .= PHP_EOL . PHP_EOL . $matches[0];
+					}
+				} else {
+					$global_content = $local_content;
+				}
+			}
+
+			file_put_contents( $global_sunrise, $global_content );
+
+		// copy new sunrise.php if we can write into wp-content directory
+		} elseif ( is_writable( WP_CONTENT_DIR ) ) {
+			@copy( $local_sunrise, $global_sunrise );
 		}
 	}
 

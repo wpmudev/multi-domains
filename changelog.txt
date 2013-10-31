@@ -1,9 +1,14 @@
 Plugin Name: Multi-Domains for Multisite
-Author: Ulrich Sossou (Incsub)
+Author: Incsub
 
 Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
+
+1.3 - 2013-10-31
+----------------------------------------------------------------------
+- Reworked the multi-domains plugin to work from plugins directory
+- Implemented functionality to auto copy/upgrade sunrise.php file
 
 1.2.3 - 2013-07-05
 ----------------------------------------------------------------------
