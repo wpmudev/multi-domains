@@ -1,138 +1,122 @@
-Plugin Name: Multi-Domains for Multisite
-Author: Incsub
+== 1.3.1 ==
 
-Change Log:
-----------------------------------------------------------------------
-----------------------------------------------------------------------
+* Improved domains table
 
-1.3 - 2013-10-31
-----------------------------------------------------------------------
-- Reworked the multi-domains plugin to work from plugins directory
-- Implemented functionality to auto copy/upgrade sunrise.php file
+== 1.3 ==
 
-1.2.3 - 2013-07-05
-----------------------------------------------------------------------
-- Updated the sunrise.
+* Reworked the multi-domains plugin to work from plugins directory
+* Implemented functionality to auto copy/upgrade sunrise.php file
 
-1.2.2 - 2013-05-30
-----------------------------------------------------------------------
-- Updating sunrise.
-- Forcing empty values existence.
+== 1.2.3 ==
 
-1.2.1 - 2012-11-19
-----------------------------------------------------------------------
-- Placement script scoping.
-- Blog selection issue fix.
+* Updated the sunrise.
 
-1.2 - 2012-08-13
-----------------------------------------------------------------------
-- Domains site search.
-- Stuck transients issue fix.
-- BuddyPress cross-domain login issue fix.
+== 1.2.2 ==
 
-1.1.6 - 01/14/2011
-----------------------------------------------------------------------
-- Better selection block placement.
+* Updating sunrise.
+* Forcing empty values existence.
 
-1.1.5 - 10/13/2011
-----------------------------------------------------------------------
-- Fix for new site creation on sub-blogs.
+== 1.2.1 ==
 
-1.1.4 - 05/16/2011
-----------------------------------------------------------------------
-- Fix for re-auth required on first login issue.
+* Placement script scoping.
+* Blog selection issue fix.
 
-1.1.3 - 01/19/2010
-----------------------------------------------------------------------
-- Enhancement: performance improvements
-- Bug fix: incorrect domain used on site creation in network admin
+== 1.2 ==
 
-1.1.2 - 01/15/2010
-----------------------------------------------------------------------
-- New Feature: Option to enable/disable single sign-on
+* Domains site search.
+* Stuck transients issue fix.
+* BuddyPress cross-domain login issue fix.
 
-1.1.1 - 01/09/2010
-----------------------------------------------------------------------
-- Enhancement: 3.1+ compatibility
-- Enhancement: Allow disabling cross domain login with a constant
+== 1.1.6 ==
 
-1.1 - 12/19/2010
-----------------------------------------------------------------------
-- Enhancement: More extensible code with new hooks and structure
-- Bug fix: Allow www in mapped domain name
+* Better selection block placement.
 
-1.0.9 - 11/15/2010
-----------------------------------------------------------------------
-- Enhancement: Better compatibility with Domain Mapping for subdomain
-installs
+== 1.1.5 ==
 
-1.0.8 - 11/09/2010
-----------------------------------------------------------------------
-- Enhancement: Keep selected domain after signup error
-- Enhancement: Don't redirect to main site when a multi-domain is also
-a mapped domain
-- Enhancement: Don't display php error when sunrise.php does not find
-any multi-domain
-- Bug fix: Domain Mapping sunrise.php overwriting the global
-$current_site
-- Bug fix: Cookies stylesheets return 404
+* Fix for new site creation on sub-blogs.
 
-1.0.7 - 10/23/2010
-----------------------------------------------------------------------
-- Bug fix: domain choice field does not appear on site admin sites page
-- Enhancement: check if COOKIE_DOMAIN is already defined
+== 1.1.4 ==
 
-1.0.6 - 10/16/2010
-----------------------------------------------------------------------
-- Bug fix: domain choice field appears on site admin blog edit page
-- Bug fix: improper redirection when the main site url start with www
-- Bug fix: authentification cookie not set when uppercase letters in
-the domain name
-- Enhancement: display domain names in alphabetical order
+* Fix for re-auth required on first login issue.
 
-1.0.5 - 10/10/2010
-----------------------------------------------------------------------
-- Bug fix: domain choice field appears on site admin blog edit page
+== 1.1.3 ==
 
-1.0.4 - 10/04/2010
-----------------------------------------------------------------------
-- Bug fix: no error message displayed when and existing user tries to
-register a blog with a name already used
-- Bug fix: incorrect admin help text and wildcard subdomain warning
-with subdir installs
+* Enhancement: performance improvements
+* Bug fix: incorrect domain used on site creation in network admin
 
-1.0.3 - 09/15/2010
-----------------------------------------------------------------------
-- Fixed issue with blog registration on subdomains installs
+== 1.1.2 ==
 
-1.0.2 - 09/05/2010
-----------------------------------------------------------------------
-- Fixed issue when dashboard site is defined.
-- Fixed 301 redirects from addon domains to main site.
-- Add IIS support for redirects from addon domains to main site.
+* New Feature: Option to enable/disable single sign-on
 
-1.0.1 - 09/01/2010
-----------------------------------------------------------------------
-- Added domain field to BuddyPress registration page.
-- Fixed compatibility issue with Anti-Slog plugin.
+== 1.1.1 ==
 
-1.0.0 - 08/31/2010
-----------------------------------------------------------------------
-- Added domain field to the Add Site for on Super Admin >
-Multi-Domains page.
+* Enhancement: 3.1+ compatibility
+* Enhancement: Allow disabling cross domain login with a constant
 
-Beta 2 - 08/31/2010
-----------------------------------------------------------------------
-- Used load_muplugin_textdomain() and load_plugin_textdomain() for
-translation.
-- Added 'md_show_restricted_domains' filter hook.
-- Added main site as default when plugin is activated.
+== 1.1 ==
 
-Beta 1 - 08/30/2010
-----------------------------------------------------------------------
-- Fixed bug that shown double site name in the activation mails.
-- Added instructions on the settings page.
+* Enhancement: More extensible code with new hooks and structure
+* Bug fix: Allow www in mapped domain name
 
-Alpha - 08/29/2010
-----------------------------------------------------------------------
-- Initial Release.
+== 1.0.9 ==
+
+* Enhancement: Better compatibility with Domain Mapping for subdomain installs
+
+== 1.0.8 ==
+
+* Enhancement: Keep selected domain after signup error
+* Enhancement: Don't redirect to main site when a multi-domain is also a mapped domain
+* Enhancement: Don't display php error when sunrise.php does not find any multi-domain
+* Bug fix: Domain Mapping sunrise.php overwriting the global $current_site
+* Bug fix: Cookies stylesheets return 404
+
+== 1.0.7 ==
+
+* Bug fix: domain choice field does not appear on site admin sites page
+* Enhancement: check if COOKIE_DOMAIN is already defined
+
+== 1.0.6 ==
+
+* Bug fix: domain choice field appears on site admin blog edit page
+* Bug fix: improper redirection when the main site url start with www
+* Bug fix: authentification cookie not set when uppercase letters in the domain name
+* Enhancement: display domain names in alphabetical order
+
+== 1.0.5 ==
+
+* Bug fix: domain choice field appears on site admin blog edit page
+
+== 1.0.4 ==
+
+* Bug fix: no error message displayed when and existing user tries to register a blog with a name already used
+* Bug fix: incorrect admin help text and wildcard subdomain warning with subdir installs
+
+== 1.0.3 ==
+
+* Fixed issue with blog registration on subdomains installs
+
+== 1.0.2 ==
+
+* Fixed issue when dashboard site is defined.
+* Fixed 301 redirects from addon domains to main site.
+* Add IIS support for redirects from addon domains to main site.
+
+== 1.0.1 ==
+
+* Added domain field to BuddyPress registration page.
+* Fixed compatibility issue with Anti-Slog plugin.
+
+== 1.0.0 ==
+
+* Added domain field to the Add Site for on Super Admin > Multi-Domains page.
+
+== Beta 2 ==
+
+* Used load_muplugin_textdomain() and load_plugin_textdomain() for translation.
+* Added 'md_show_restricted_domains' filter hook.
+* Added main site as default when plugin is activated.
+
+== Beta 1 ==
+
+* Fixed bug that shown double site name in the activation mails.
+* Added instructions on the settings page.

@@ -434,167 +434,135 @@ class multi_domain {
 	 * Super Admin page.
 	 */
 	function management_page() {
-
-		if ( !function_exists( 'is_super_admin' ) || !is_super_admin() )
+		if ( !is_super_admin() ) {
 			wp_die( '<p>' . __( 'You do not have permission to access this page.', $this->textdomain ) . '</p>' );
-
-			if ( isset( $_POST['add_domain'] ) && isset( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ):
-				if( $message = $this->add_domain_post() )
-					echo '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
-				else
-					echo '<div id="message" class="error"><p>' . __( 'Error : the domain was not added', $this->textdomain ) . '</p></div>';
-
-			elseif ( isset( $_POST['edit_domain'] ) && isset( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ):
-				if( $message = $this->edit_domain_post() )
-					echo '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
-				else
-					echo '<div id="message" class="error"><p>' . __( 'Error : the domain was not saved', $this->textdomain ) . '</p></div>';
-
-			elseif ( isset( $_GET['delete'] ) && isset( $_GET['name'] ) ):
-				if( $message = $this->delete_domain_post() )
-					echo '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
-				else
-					echo '<div id="message" class="error"><p>' . __( 'Error : the domain was not deleted', $this->textdomain ) . '</p></div>';
-
-			elseif ( isset( $_POST['action'] ) && $_POST['action'] == 'deletedomains' ):
-				if( $message = $this->delete_domains_post() )
-					echo '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
-				else
-					echo '<div id="message" class="error"><p>' . __( 'Error : the domains were not deleted', $this->textdomain ) . '</p></div>';
-
-			elseif( !empty( $_GET['single_signon'] ) ):
-				if( 'enable' == $_GET['single_signon'] )
-					echo '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on enabled.', $this->textdomain ) . '</p></div>';
-				elseif( 'disable' == $_GET['single_signon'] )
-					echo '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on disabled.', $this->textdomain ) . '</p></div>';
-
-			endif;
-			?>
-
-			<div class="wrap" style="position: relative">
-
-			<?php
-			$action = isset( $_GET['action'] ) ? $_GET['action'] : '';
-			switch( $action ) {
-				default:
-?>
-
-	<div id="icon-ms-admin" class="icon32"></div>
-	<h2><?php _e ( 'Domains', $this->textdomain ) ?></h2>
-	<?php
-	if ( !file_exists( ABSPATH . '/wp-content/sunrise.php' ) ) {
-		echo '<div id="message" class="error"><p>' . sprintf( __( "Please copy the sunrise.php to %swp-content/sunrise.php and uncomment the SUNRISE setting in the %swp-config.php file.", $this->textdomain ), ABSPATH, ABSPATH ) . '</p></div>';
-	}
-
-	if ( !defined( 'SUNRISE' ) ) {
-		echo '<div id="message" class="error"><p>' . sprintf( __( "Please uncomment the line <em>//define( 'SUNRISE', 'on' );</em> in the %swp-config.php file.", $this->textdomain ), ABSPATH ) . '</p></div>';
-	}
-	?>
-
-	<div id="col-container">
-
-		<div id="col-right">
-
-			<form method="post" action="?page=multi-domains" name="formlist">
-				<input type="hidden" name="action" value="deletedomains" />
-				<div class="tablenav">
-					<p class="alignleft">
-						<input type="submit" value="<?php _e( 'Delete', $this->textdomain ) ?>" name="delete_domains" class="button-secondary delete">
-					</p>
-				</div>
-				<br class="clear">
-				<table cellspacing="3" cellpadding="3" width="100%" class="widefat">
-					<thead>
-						<tr>
-							<?php $this->print_column_headers(); ?>
-						</tr>
-					</thead>
-					<tfoot>
-						<tr>
-							<?php $this->print_column_headers(); ?>
-						</tr>
-					</tfoot>
-					<tbody>
-						<?php
-						if( !empty( $this->domains ) ) {
-							foreach( $this->domains as $domain ) {
-								$this->domain_row( $domain );
-							}
-						}
-						?>
-					</tbody>
-				</table>
-				<div class="tablenav">
-					<div class="alignleft">
-						<input type="submit" value="<?php _e ( 'Delete', $this->textdomain ) ?>" name="domain-delete" class="button-secondary delete">
-					</div>
-				</div>
-				<?php
-				if( is_subdomain_install() ):
-				echo '<p>In the DNS records for each domain added here, add a wildcard subdomain that points to this WordPress installation.<br />It should look like: <strong>A *.domain.com</strong></p>';
-
-				if( !empty( $this->domains ) ): foreach( $this->domains as $domain ): if( $domain['domain_name'] !== DOMAIN_CURRENT_SITE ):
-
-				$result = '';
-				if (false === ( $result = get_transient( 'wp_hostname_' . $domain['domain_name'] ) ) ) {
-					$host_ok = false;
-					$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain['domain_name']; // Very random hostname!
-					$page = wp_remote_get( 'http://' . $hostname, array( 'timeout' => 5, 'httpversion' => '1.1' ) );
-					if ( is_wp_error( $page ) )
-						$errstr = $page->get_error_message();
-					else
-						$host_ok = true;
-
-					if ( $host_ok == false ) {
-						$result = '<div class="error"><p><strong>' . sprintf( __( 'Warning! Wildcard DNS for %s may not be configured correctly!', $this->textdomain ), $domain['domain_name'] ) . '</strong></p>';
-						$result .= '<p>' . sprintf( __( 'Unable to contact the random hostname (<code>%s</code>).', $this->textdomain ), $hostname );
-						if ( ! empty ( $errstr ) )
-							echo ' ' . sprintf( __( 'This resulted in an error message: %s', $this->textdomain ), '<code>' . $errstr . '</code>' );
-						$result .= '</p></div>';
-					}
-					set_transient( 'wp_hostname_' . $domain['domain_name'] , $result, 60 * 15 );
-				}
-				echo $result;
-
-				endif; endforeach; endif;
-
-				else:
-				echo '<p>Change the DNS records for each domain to point to this WordPress installation.</p>';
-				endif;
-				?>
-			</form><br />
-
-			<h3><?php _e( 'Single Signon', $this->textdomain ) ?></h3>
-			<p>The Single Sign-on feature synchronize login cookies on all the domains.</p>
-			<?php if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) { ?>
-				<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary">Disable Single Sign-on</a></p>
-			<?php } else { ?>
-				<p><a href="?page=multi-domains&single_signon=enable" class="button-secondary">Enable Single Sign-on</a></p>
-			<?php } ?>
-
-		</div><!-- #col-right -->
-
-		<div id="col-left">
-
-		<?php
-		if( isset( $_GET['edit'] ) )
-			$this->edit_domain_form();
-		else
-			$this->add_domain_form();
-		?>
-
-		</div><!-- #col-left -->
-
-	</div><!-- #col-container -->
-
-<?php
-			break;
 		}
-?>
 
-</div><!-- .wrap -->
+		require_once dirname( __FILE__ ) . '/multi-domains-table.php';
 
-<?php
+		$table = new Multidomains_Table( array( 'actions' => array( 'deletedomains' => __( 'Delete', $this->textdomain ) ) ) );
+
+		$messages = array();
+		if ( isset( $_POST['add_domain'] ) && isset( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ) {
+			if ( ( $message = $this->add_domain_post() ) ) {
+				$messages[] = '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
+			} else {
+				$messages[] = '<div id="message" class="error"><p>' . __( 'Error : the domain was not added', $this->textdomain ) . '</p></div>';
+			}
+		} elseif ( isset( $_POST['edit_domain'] ) && isset( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ) {
+			if ( ( $message = $this->edit_domain_post() ) ) {
+				$messages[] = '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
+			} else {
+				$messages[] = '<div id="message" class="error"><p>' . __( 'Error : the domain was not saved', $this->textdomain ) . '</p></div>';
+			}
+		} elseif ( isset( $_GET['delete'] ) && isset( $_GET['name'] ) ) {
+			if ( ( $message = $this->delete_domain_post() ) ) {
+				$messages[] = '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
+			} else {
+				$messages[] = '<div id="message" class="error"><p>' . __( 'Error : the domain was not deleted', $this->textdomain ) . '</p></div>';
+			}
+		} elseif ( $table->current_action() == 'deletedomains' ) {
+			if ( ( $message = $this->delete_domains_post() ) ) {
+				$messages[] = '<div id="message" class="updated fade"><p>' . $message . '</p></div>';
+			} else {
+				$messages[] = '<div id="message" class="error"><p>' . __( 'Error : the domains were not deleted', $this->textdomain ) . '</p></div>';
+			}
+		} elseif ( !empty( $_GET['single_signon'] ) ) {
+			if ( 'enable' == $_GET['single_signon'] ) {
+				$messages[] = '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on enabled.', $this->textdomain ) . '</p></div>';
+			} elseif ( 'disable' == $_GET['single_signon'] ) {
+				$messages[] = '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on disabled.', $this->textdomain ) . '</p></div>';
+			}
+		}
+
+		?><div class="wrap" style="position: relative">
+
+			<div id="icon-ms-admin" class="icon32"></div>
+			<h2><?php _e ( 'Domains', $this->textdomain ) ?></h2>
+
+			<?php echo implode( '', $messages ) ?>
+
+			<?php if ( !file_exists( ABSPATH . '/wp-content/sunrise.php' ) ) : ?>
+				<div id="message" class="error">
+					<p><?php
+						printf( __( 'Please copy the %1$s to %2$s%3$s and uncomment the SUNRISE setting in the %2$s%4$s file.', $this->textdomain ), 'sunrise.php', ABSPATH, 'wp-content/sunrise.php', 'wp-config.php' )
+					?></p>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( !defined( 'SUNRISE' ) ) : ?>
+				<div id="message" class="error">
+					<p><?php
+						printf( __( 'Please uncomment the line %s in the %s file.', $this->textdomain ), "<em>//define( 'SUNRISE', 'on' );</em>", ABSPATH . wp-config.php )
+					?></p>
+				</div>
+			<?php endif; ?>
+
+			<div id="col-container">
+				<div id="col-right">
+
+					<form method="post" action="?page=multi-domains" name="formlist">
+						<?php $table->prepare_items() ?>
+						<?php $table->display() ?>
+					</form>
+
+
+					<?php if( is_subdomain_install() ) : ?>
+						<p>
+							<?php _e( 'In the DNS records for each domain added here, add a wildcard subdomain that points to this WordPress installation. It should look like:', $this->textdomain ) ?> <strong>A *.domain.com</strong>
+						</p>
+
+						<?php
+						if ( !empty( $this->domains ) ):
+							foreach ( $this->domains as $domain ):
+								if ( $domain['domain_name'] !== DOMAIN_CURRENT_SITE ) :
+									$result = '';
+									if ( false === ( $result = get_transient( 'wp_hostname_' . $domain['domain_name'] ) ) ) {
+										$host_ok = false;
+										$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain['domain_name']; // Very random hostname!
+										$page = wp_remote_get( 'http://' . $hostname, array( 'timeout' => 5, 'httpversion' => '1.1' ) );
+										if ( is_wp_error( $page ) )
+											$errstr = $page->get_error_message();
+										else
+											$host_ok = true;
+
+										if ( $host_ok == false ) {
+											$result = '<div class="error"><p><strong>' . sprintf( __( 'Warning! Wildcard DNS for %s may not be configured correctly!', $this->textdomain ), $domain['domain_name'] ) . '</strong></p>';
+											$result .= '<p>' . sprintf( __( 'Unable to contact the random hostname (<code>%s</code>).', $this->textdomain ), $hostname );
+											if ( !empty( $errstr ) )
+												echo ' ' . sprintf( __( 'This resulted in an error message: %s', $this->textdomain ), '<code>' . $errstr . '</code>' );
+											$result .= '</p></div>';
+										}
+										set_transient( 'wp_hostname_' . $domain['domain_name'], $result, 60 * 15 );
+									}
+									echo $result;
+								endif;
+							endforeach;
+						endif;
+						?>
+					<?php else: ?>
+						<p><?php _e( 'Change the DNS records for each domain to point to this WordPress installation.', $this->textdomain ) ?></p>
+					<?php endif; ?>
+				</div>
+
+				<div id="col-left">
+					<?php if( isset( $_GET['edit'] ) ) : ?>
+						<?php $this->edit_domain_form() ?>
+					<?php else : ?>
+						<?php $this->add_domain_form() ?>
+
+						<h3><?php _e( 'Single Signon', $this->textdomain ) ?></h3>
+
+						<p><?php _e( 'The Single Sign-on feature synchronize login cookies on all the domains.', $this->textdomain ) ?></p>
+						<?php if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) : ?>
+							<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary"><?php _e( 'Disable Single Sign-on', $this->textdomain ) ?></a></p>
+						<?php else : ?>
+							<p><a href="?page=multi-domains&single_signon=enable" class="button-secondary"><?php _e( 'Enable Single Sign-on', $this->textdomain ) ?></a></p>
+						<?php endif; ?>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div><?php
 	}
 
 	/**
@@ -609,72 +577,6 @@ class multi_domain {
 				update_site_option( 'multi_domains_single_signon', 'disabled' );
 			}
 		}
-	}
-
-	/**
-	 * Column headers for domains table.
-	 */
-	function get_column_headers() {
-		$columns = array(
-			'cb'     => __( 'Checkbox', $this->textdomain ),
-			'domain' => __( 'Domain', $this->textdomain ),
-			'status' => __( 'Status', $this->textdomain )
-		);
-
-		return apply_filters( 'manage_multi_domains_columns', $columns );
-	}
-
-	/**
-	 * Display column headers in domains table.
-	 */
-	function print_column_headers() {
-		foreach( $this->get_column_headers() as $column_name => $column_display_name ) {
-			if( 'cb' == $column_name )
-				echo '<th class="column-cb check-column" scope="col"><input type="checkbox" id="select_all"></th>';
-			else
-				echo "<th scope='col' class='$column_name'>$column_display_name</th>";
-		}
-	}
-
-	/**
-	 * Display rows in domains table.
-	 */
-	function domain_row( $domain ) {
-		echo '<tr>';
-
-		foreach( $this->get_column_headers() as $column_name => $column_display_name ) {
-			switch ( $column_name ) {
-				case 'cb':
-				?>
-				<th style="width: auto;" class="check-column" scope="row"><input type="checkbox" value="<?php echo $domain['domain_name'] ?>" name="domains[]" id="2"><label for="2"></label></th>
-				<?php
-				break;
-
-				case 'domain':
-				?>
-				<td><?php echo $domain['domain_name'] ?>
-					<div class="row-actions">
-						<a title="<?php _e ( 'Edit this domain', $this->textdomain ) ?>" href="?page=multi-domains&edit=1&name=<?php echo $domain['domain_name']; ?>" class="edit">Edit</a> | <a title="<?php _e ( 'Delete this domain', $this->textdomain ) ?>" href="?page=multi-domains&delete=1&name=<?php echo $domain['domain_name'] ?>" class="delete">Delete</a>
-					</div>
-				</td>
-				<?php
-				break;
-
-				case 'status':
-				?>
-				<td><?php echo $domain['domain_status'] ?></td>
-				<?php
-				break;
-
-				default:
-				?>
-				<td><?php do_action( 'manage_multi_domains_custom_column', $column_name, $domain ); ?></td>
-				<?php
-				break;
-			}
-		}
-
-		echo '</tr>';
 	}
 
 	/**
@@ -813,10 +715,10 @@ class multi_domain {
 	 * Process multiple domains deletion form data.
 	 */
 	function delete_domains_post() {
-		if( isset( $_POST['action'] ) && $_POST['action'] == 'deletedomains' ) {
+		if ( filter_input( INPUT_POST, 'action' ) == 'deletedomains' || filter_input( INPUT_POST, 'action2' ) == 'deletedomains' ) {
 			$domains = $_POST['domains'];
-			if( !empty( $domains ) ) {
-				foreach( $domains as $domain ) {
+			if ( !empty( $domains ) ) {
+				foreach ( $domains as $domain ) {
 					$this->delete_domain( $domain );
 				}
 				$this->update_domains_option();
