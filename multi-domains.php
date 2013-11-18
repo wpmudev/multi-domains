@@ -980,39 +980,25 @@ class multi_domain {
 	 * Log user out if value set in database.
 	 */
 	function maybe_logout_user() {
-		$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
-		$key = get_site_option( "multi_domains_cross_domain_$dom" );
-		$hash = md5( AUTH_KEY . 'multi_domains' );
+		$dom = str_replace( '.', '', $_SERVER['HTTP_HOST'] );
+		$key = (array)get_site_option( "multi_domains_cross_domain_$dom" );
 
 		if ( is_user_logged_in() ) {
-			$user = wp_get_current_user();
-			$user_id = $user->ID;
+			$user_id = get_current_user_id();
+			if ( array_key_exists( $user_id, $key ) && $key[$user_id]['action'] == 'logout' ) {
+				wp_clear_auth_cookie();
 
-			if( array_key_exists( $user_id, (array) $key ) ) {
-				switch($key[$user_id]['action']) {
-					case 'logout':
-						wp_clear_auth_cookie();
+				delete_transient( "multi_domains_{$dom}_{$user_id}" );
 
-						delete_transient( "multi_domains_{$dom}_{$user_id}" );
+				unset( $key[$user_id] );
+				update_site_option( "multi_domains_cross_domain_$dom", $key );
 
-						unset( $key[$user_id] );
-						update_site_option( "multi_domains_cross_domain_$dom", (array) $key );
+				$referer = wp_get_referer();
+				$proto = is_ssl() ? 'https://' : 'http://';
+				$redirect = ( strpos( $_SERVER['REQUEST_URI'], '/options.php' ) && $referer ) ? $referer : $proto . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-						if ( is_ssl() )
-							$proto = 'https://';
-						else
-							$proto = 'http://';
-
-						$redirect = ( strpos($_SERVER['REQUEST_URI'], '/options.php') && wp_get_referer() ) ? wp_get_referer() : $proto . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
-						$login_url = wp_login_url( $redirect, true );
-						wp_redirect( $login_url );
-						exit();
-
-						break;
-					default:
-						break;
-				}
+				wp_redirect( wp_login_url( $redirect, true ) );
+				exit();
 			}
 		}
 	}
@@ -1023,15 +1009,14 @@ class multi_domain {
 	function build_logout_cookie( $action ) {
 
 		$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
-		$key = get_site_option( "multi_domains_cross_domain_$dom" );
+		$key = (array)get_site_option( "multi_domains_cross_domain_$dom" );
 
 		if ( 'log-out' == $action ) {
 			$this->build_cookie( 'logout' );
 
-			$user = wp_get_current_user();
-			$user_id = $user->ID;
+			$user_id = get_current_user_id();
 			unset( $key[$user_id] );
-			update_site_option( "multi_domains_cross_domain_$dom", (array) $key );
+			update_site_option( "multi_domains_cross_domain_$dom", $key );
 		}
 	}
 
@@ -1039,12 +1024,9 @@ class multi_domain {
 	 * Build login cookie.
 	 */
 	function build_cookie( $action = 'login' ) {
-
-		$user = wp_get_current_user();
-
-		$blogs = get_blogs_of_user( $user->ID );
+		$blogs = get_blogs_of_user( get_current_user_id() );
 		if ( is_array( $blogs ) ) {
-			foreach ( (array) $blogs as $key => $val ) {
+			foreach ( $blogs as $val ) {
 				$this->build_blog_cookie( $action, $val->userblog_id );
 			}
 		}
@@ -1077,9 +1059,7 @@ class multi_domain {
 		if( $url ) {
 			$key = get_site_option( "multi_domains_cross_domain_$dom", array() );
 
-			$user = wp_get_current_user();
-
-			$user_id = $user->id;
+			$user_id = get_current_user_id();
 
 			if( ! isset( $key[$user_id]['action'] ) || ( isset( $key[$user_id]['action'] ) && $key[$user_id]['action'] !== $action ) ) {
 				$key[$user_id] = array (
