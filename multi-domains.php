@@ -513,18 +513,19 @@ class multi_domain {
 						</p>
 
 						<?php
-						if ( !empty( $this->domains ) ):
-							foreach ( $this->domains as $domain ):
+						if ( !empty( $table->items ) ):
+							foreach ( $table->items as $domain ):
 								if ( $domain['domain_name'] !== DOMAIN_CURRENT_SITE ) :
 									$result = '';
 									if ( false === ( $result = get_transient( 'wp_hostname_' . $domain['domain_name'] ) ) ) {
 										$host_ok = false;
 										$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain['domain_name']; // Very random hostname!
 										$page = wp_remote_get( 'http://' . $hostname, array( 'timeout' => 5, 'httpversion' => '1.1' ) );
-										if ( is_wp_error( $page ) )
+										if ( is_wp_error( $page ) ) {
 											$errstr = $page->get_error_message();
-										else
+										} else {
 											$host_ok = true;
+										}
 
 										if ( $host_ok == false ) {
 											$result = '<div class="error"><p><strong>' . sprintf( __( 'Warning! Wildcard DNS for %s may not be configured correctly!', $this->textdomain ), $domain['domain_name'] ) . '</strong></p>';
@@ -533,7 +534,7 @@ class multi_domain {
 												echo ' ' . sprintf( __( 'This resulted in an error message: %s', $this->textdomain ), '<code>' . $errstr . '</code>' );
 											$result .= '</p></div>';
 										}
-										set_transient( 'wp_hostname_' . $domain['domain_name'], $result, 60 * 15 );
+										set_transient( 'wp_hostname_' . $domain['domain_name'], $result, DAY_IN_SECONDS );
 									}
 									echo $result;
 								endif;

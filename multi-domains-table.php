@@ -201,7 +201,7 @@ class Multidomains_Table extends WP_List_Table {
 			$this->get_sortable_columns()
 		);
 
-		$per_page = 20;
+		$per_page = 10;
 		$offset = ( $this->get_pagenum() - 1 ) * $per_page;
 
 		$items = get_site_option( 'md_domains' );
