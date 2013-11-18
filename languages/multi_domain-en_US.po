@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Multi-Domains\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-18 12:05+0300\n"
-"PO-Revision-Date: 2013-11-18 12:06+0300\n"
+"POT-Creation-Date: 2013-11-18 23:18+0300\n"
+"PO-Revision-Date: 2013-11-18 23:18+0300\n"
 "Last-Translator: Eugene Manuilov <eugene@manuilov.org>\n"
 "Language-Team: Incsub <devs@incsub.com>\n"
 "Language: en_US\n"
@@ -55,39 +55,39 @@ msgstr "The domain %s was not found in the list."
 msgid "You do not have permission to access this page."
 msgstr "You do not have permission to access this page."
 
-#: multi-domains.php:443 multi-domains-table.php:152
+#: multi-domains.php:446 multi-domains-table.php:152
 msgid "Delete"
 msgstr "Delete"
 
-#: multi-domains.php:450
+#: multi-domains.php:455
 msgid "Error : the domain was not added"
 msgstr "Error : the domain was not added"
 
-#: multi-domains.php:456
+#: multi-domains.php:461
 msgid "Error : the domain was not saved"
 msgstr "Error : the domain was not saved"
 
-#: multi-domains.php:462
+#: multi-domains.php:467
 msgid "Error : the domain was not deleted"
 msgstr "Error : the domain was not deleted"
 
-#: multi-domains.php:468
+#: multi-domains.php:473
 msgid "Error : the domains were not deleted"
 msgstr "Error : the domains were not deleted"
 
-#: multi-domains.php:472
+#: multi-domains.php:477
 msgid "Single Sign-on enabled."
 msgstr "Single Sign-on enabled."
 
-#: multi-domains.php:474
+#: multi-domains.php:479
 msgid "Single Sign-on disabled."
 msgstr "Single Sign-on disabled."
 
-#: multi-domains.php:481
+#: multi-domains.php:486
 msgid "Domains"
 msgstr "Domains"
 
-#: multi-domains.php:488
+#: multi-domains.php:493
 #, php-format
 msgid ""
 "Please copy the %1$s to %2$s%3$s and uncomment the SUNRISE setting in the "
@@ -96,12 +96,16 @@ msgstr ""
 "Please copy the %1$s to %2$s%3$s and uncomment the SUNRISE setting in the "
 "%2$s%4$s file."
 
-#: multi-domains.php:496
+#: multi-domains.php:501
 #, php-format
 msgid "Please uncomment the line %s in the %s file."
 msgstr "Please uncomment the line %s in the %s file."
 
-#: multi-domains.php:512
+#: multi-domains.php:511
+msgid "Search Added Domains"
+msgstr "Search Added Domains"
+
+#: multi-domains.php:517
 msgid ""
 "In the DNS records for each domain added here, add a wildcard subdomain that "
 "points to this WordPress installation. It should look like:"
@@ -109,7 +113,7 @@ msgstr ""
 "In the DNS records for each domain added here, add a wildcard subdomain that "
 "points to this WordPress installation. It should look like:"
 
-#: multi-domains.php:514
+#: multi-domains.php:519
 msgid ""
 "Pay attention that values of Wildcard DNS Availability column are refreshed "
 "each 5 minutes."
@@ -117,7 +121,7 @@ msgstr ""
 "Pay attention that values of Wildcard DNS Availability column are refreshed "
 "each 5 minutes."
 
-#: multi-domains.php:516
+#: multi-domains.php:521
 msgid ""
 "Change the DNS records for each domain to point to this WordPress "
 "installation."
@@ -125,30 +129,30 @@ msgstr ""
 "Change the DNS records for each domain to point to this WordPress "
 "installation."
 
-#: multi-domains.php:527
+#: multi-domains.php:532
 msgid "Single Signon"
 msgstr "Single Signon"
 
-#: multi-domains.php:529
+#: multi-domains.php:534
 msgid ""
 "The Single Sign-on feature synchronize login cookies on all the domains."
 msgstr ""
 "The Single Sign-on feature synchronize login cookies on all the domains."
 
-#: multi-domains.php:531
+#: multi-domains.php:536
 msgid "Disable Single Sign-on"
 msgstr "Disable Single Sign-on"
 
-#: multi-domains.php:533
+#: multi-domains.php:538
 msgid "Enable Single Sign-on"
 msgstr "Enable Single Sign-on"
 
-#: multi-domains.php:566
+#: multi-domains.php:571
 #, php-format
 msgid "The domain %s has been successfully added."
 msgstr "The domain %s has been successfully added."
 
-#: multi-domains.php:585
+#: multi-domains.php:590
 #, php-format
 msgid ""
 "This feature allows you to set multiple domains that users can run their "
@@ -159,61 +163,61 @@ msgstr ""
 "sites from, for example you can allow a user to run a site at %s and so on - "
 "all on this one Multisite install."
 
-#: multi-domains.php:589 multi-domains.php:619
+#: multi-domains.php:594 multi-domains.php:624
 msgid "Add Domain"
 msgstr "Add Domain"
 
-#: multi-domains.php:597 multi-domains.php:660
+#: multi-domains.php:602 multi-domains.php:665
 msgid "Domain Name"
 msgstr "Domain Name"
 
-#: multi-domains.php:598 multi-domains.php:662
+#: multi-domains.php:603 multi-domains.php:667
 msgid "The domain name"
 msgstr "The domain name"
 
-#: multi-domains.php:601 multi-domains.php:667
+#: multi-domains.php:606 multi-domains.php:672
 msgid "Domain Visibility"
 msgstr "Domain Visibility"
 
-#: multi-domains.php:610
+#: multi-domains.php:615
 msgid "Public: available to all users"
 msgstr "Public: available to all users"
 
-#: multi-domains.php:611
+#: multi-domains.php:616
 msgid "Restricted: available only to users which have special permission"
 msgstr "Restricted: available only to users which have special permission"
 
-#: multi-domains.php:612
+#: multi-domains.php:617
 msgid "Private: available only to Super Admins"
 msgstr "Private: available only to Super Admins"
 
-#: multi-domains.php:635
+#: multi-domains.php:640
 #, php-format
 msgid "The domain %s has been successfully modified."
 msgstr "The domain %s has been successfully modified."
 
-#: multi-domains.php:654
+#: multi-domains.php:659
 msgid "Edit Domain"
 msgstr "Edit Domain"
 
-#: multi-domains.php:682
+#: multi-domains.php:687
 msgid "Save Domain"
 msgstr "Save Domain"
 
-#: multi-domains.php:697
+#: multi-domains.php:702
 #, php-format
 msgid "The domain %s has been successfully deleted."
 msgstr "The domain %s has been successfully deleted."
 
-#: multi-domains.php:713
+#: multi-domains.php:718
 msgid "The domains have been successfully deleted."
 msgstr "The domains have been successfully deleted."
 
-#: multi-domains.php:809
+#: multi-domains.php:814
 msgid "Your address will be"
 msgstr "Your address will be"
 
-#: multi-domains.php:848 multi-domains.php:861
+#: multi-domains.php:853 multi-domains.php:866
 msgid "Only the characters a-z and 0-9 recommended."
 msgstr "Only the characters a-z and 0-9 recommended."
 

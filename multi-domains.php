@@ -440,7 +440,12 @@ class multi_domain {
 
 		require_once dirname( __FILE__ ) . '/multi-domains-table.php';
 
-		$table = new Multidomains_Table( array( 'actions' => array( 'deletedomains' => __( 'Delete', $this->textdomain ) ) ) );
+		$table = new Multidomains_Table( array(
+			'search_box' => true,
+			'actions'    => array(
+				'deletedomains' => __( 'Delete', $this->textdomain )
+			),
+		) );
 
 		$messages = array();
 		if ( isset( $_POST['add_domain'] ) && isset( $_POST['domain_name'] ) && isset( $_POST['domain_status'] ) ) {
@@ -501,11 +506,11 @@ class multi_domain {
 			<div id="col-container">
 				<div id="col-right">
 
-					<form method="post" action="?page=multi-domains" name="formlist">
+					<form method="post" action="?page=multi-domains">
 						<?php $table->prepare_items() ?>
+						<?php $table->search_box( __( 'Search Added Domains', $this->textdomain ), 'multi_domains_search' ) ?>
 						<?php $table->display() ?>
 					</form>
-
 
 					<p><?php
 						if( is_subdomain_install() ) :
