@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Multi-Domains\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-15 14:32+0300\n"
-"PO-Revision-Date: 2013-11-15 14:32+0300\n"
+"POT-Creation-Date: 2013-11-18 12:05+0300\n"
+"PO-Revision-Date: 2013-11-18 12:06+0300\n"
 "Last-Translator: Eugene Manuilov <eugene@manuilov.org>\n"
 "Language-Team: Incsub <devs@incsub.com>\n"
 "Language: en_US\n"
@@ -37,7 +37,7 @@ msgstr ""
 msgid "Multi-Domains"
 msgstr "Multi-Domains"
 
-#: multi-domains.php:275 multi-domains-table.php:185
+#: multi-domains.php:275 multi-domains-table.php:217
 msgid "Domain"
 msgstr "Domain"
 
@@ -109,22 +109,15 @@ msgstr ""
 "In the DNS records for each domain added here, add a wildcard subdomain that "
 "points to this WordPress installation. It should look like:"
 
-#: multi-domains.php:530
-#, php-format
-msgid "Warning! Wildcard DNS for %s may not be configured correctly!"
-msgstr "Warning! Wildcard DNS for %s may not be configured correctly!"
+#: multi-domains.php:514
+msgid ""
+"Pay attention that values of Wildcard DNS Availability column are refreshed "
+"each 5 minutes."
+msgstr ""
+"Pay attention that values of Wildcard DNS Availability column are refreshed "
+"each 5 minutes."
 
-#: multi-domains.php:531
-#, php-format
-msgid "Unable to contact the random hostname (<code>%s</code>)."
-msgstr "Unable to contact the random hostname (<code>%s</code>)."
-
-#: multi-domains.php:533
-#, php-format
-msgid "This resulted in an error message: %s"
-msgstr "This resulted in an error message: %s"
-
-#: multi-domains.php:544
+#: multi-domains.php:516
 msgid ""
 "Change the DNS records for each domain to point to this WordPress "
 "installation."
@@ -132,30 +125,30 @@ msgstr ""
 "Change the DNS records for each domain to point to this WordPress "
 "installation."
 
-#: multi-domains.php:554
+#: multi-domains.php:527
 msgid "Single Signon"
 msgstr "Single Signon"
 
-#: multi-domains.php:556
+#: multi-domains.php:529
 msgid ""
 "The Single Sign-on feature synchronize login cookies on all the domains."
 msgstr ""
 "The Single Sign-on feature synchronize login cookies on all the domains."
 
-#: multi-domains.php:558
+#: multi-domains.php:531
 msgid "Disable Single Sign-on"
 msgstr "Disable Single Sign-on"
 
-#: multi-domains.php:560
+#: multi-domains.php:533
 msgid "Enable Single Sign-on"
 msgstr "Enable Single Sign-on"
 
-#: multi-domains.php:593
+#: multi-domains.php:566
 #, php-format
 msgid "The domain %s has been successfully added."
 msgstr "The domain %s has been successfully added."
 
-#: multi-domains.php:607
+#: multi-domains.php:585
 #, php-format
 msgid ""
 "This feature allows you to set multiple domains that users can run their "
@@ -166,61 +159,61 @@ msgstr ""
 "sites from, for example you can allow a user to run a site at %s and so on - "
 "all on this one Multisite install."
 
-#: multi-domains.php:610 multi-domains.php:638
+#: multi-domains.php:589 multi-domains.php:619
 msgid "Add Domain"
 msgstr "Add Domain"
 
-#: multi-domains.php:616 multi-domains.php:674
+#: multi-domains.php:597 multi-domains.php:660
 msgid "Domain Name"
 msgstr "Domain Name"
 
-#: multi-domains.php:617 multi-domains.php:675
+#: multi-domains.php:598 multi-domains.php:662
 msgid "The domain name"
 msgstr "The domain name"
 
-#: multi-domains.php:620 multi-domains.php:678
-msgid "Domain Status"
-msgstr "Domain Status"
+#: multi-domains.php:601 multi-domains.php:667
+msgid "Domain Visibility"
+msgstr "Domain Visibility"
 
-#: multi-domains.php:629
+#: multi-domains.php:610
 msgid "Public: available to all users"
 msgstr "Public: available to all users"
 
-#: multi-domains.php:630
+#: multi-domains.php:611
 msgid "Restricted: available only to users which have special permission"
 msgstr "Restricted: available only to users which have special permission"
 
-#: multi-domains.php:631
+#: multi-domains.php:612
 msgid "Private: available only to Super Admins"
 msgstr "Private: available only to Super Admins"
 
-#: multi-domains.php:654
+#: multi-domains.php:635
 #, php-format
 msgid "The domain %s has been successfully modified."
 msgstr "The domain %s has been successfully modified."
 
-#: multi-domains.php:668
+#: multi-domains.php:654
 msgid "Edit Domain"
 msgstr "Edit Domain"
 
-#: multi-domains.php:693
+#: multi-domains.php:682
 msgid "Save Domain"
 msgstr "Save Domain"
 
-#: multi-domains.php:709
+#: multi-domains.php:697
 #, php-format
 msgid "The domain %s has been successfully deleted."
 msgstr "The domain %s has been successfully deleted."
 
-#: multi-domains.php:725
+#: multi-domains.php:713
 msgid "The domains have been successfully deleted."
 msgstr "The domains have been successfully deleted."
 
-#: multi-domains.php:821
+#: multi-domains.php:809
 msgid "Your address will be"
 msgstr "Your address will be"
 
-#: multi-domains.php:860 multi-domains.php:873
+#: multi-domains.php:848 multi-domains.php:861
 msgid "Only the characters a-z and 0-9 recommended."
 msgstr "Only the characters a-z and 0-9 recommended."
 
@@ -236,15 +229,18 @@ msgstr "unknown"
 msgid "Edit"
 msgstr "Edit"
 
-#: multi-domains-table.php:186
-msgid "Status"
-msgstr "Status"
+#: multi-domains-table.php:184
+msgid "available"
+msgstr "available"
 
-#~ msgid "Checkbox"
-#~ msgstr "Checkbox"
+#: multi-domains-table.php:185
+msgid "unavailable"
+msgstr "unavailable"
 
-#~ msgid "Edit this domain"
-#~ msgstr "Edit this domain"
+#: multi-domains-table.php:218
+msgid "Visibility"
+msgstr "Visibility"
 
-#~ msgid "Delete this domain"
-#~ msgstr "Delete this domain"
+#: multi-domains-table.php:222
+msgid "Wildcard DNS Availability"
+msgstr "Wildcard DNS Availability"

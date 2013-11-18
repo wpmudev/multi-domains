@@ -507,43 +507,15 @@ class multi_domain {
 					</form>
 
 
-					<?php if( is_subdomain_install() ) : ?>
-						<p>
-							<?php _e( 'In the DNS records for each domain added here, add a wildcard subdomain that points to this WordPress installation. It should look like:', $this->textdomain ) ?> <strong>A *.domain.com</strong>
-						</p>
-
-						<?php
-						if ( !empty( $table->items ) ):
-							foreach ( $table->items as $domain ):
-								if ( $domain['domain_name'] !== DOMAIN_CURRENT_SITE ) :
-									$result = '';
-									if ( false === ( $result = get_transient( 'wp_hostname_' . $domain['domain_name'] ) ) ) {
-										$host_ok = false;
-										$hostname = substr( md5( time() ), 0, 6 ) . '.' . $domain['domain_name']; // Very random hostname!
-										$page = wp_remote_get( 'http://' . $hostname, array( 'timeout' => 5, 'httpversion' => '1.1' ) );
-										if ( is_wp_error( $page ) ) {
-											$errstr = $page->get_error_message();
-										} else {
-											$host_ok = true;
-										}
-
-										if ( $host_ok == false ) {
-											$result = '<div class="error"><p><strong>' . sprintf( __( 'Warning! Wildcard DNS for %s may not be configured correctly!', $this->textdomain ), $domain['domain_name'] ) . '</strong></p>';
-											$result .= '<p>' . sprintf( __( 'Unable to contact the random hostname (<code>%s</code>).', $this->textdomain ), $hostname );
-											if ( !empty( $errstr ) )
-												echo ' ' . sprintf( __( 'This resulted in an error message: %s', $this->textdomain ), '<code>' . $errstr . '</code>' );
-											$result .= '</p></div>';
-										}
-										set_transient( 'wp_hostname_' . $domain['domain_name'], $result, DAY_IN_SECONDS );
-									}
-									echo $result;
-								endif;
-							endforeach;
+					<p><?php
+						if( is_subdomain_install() ) :
+							_e( 'In the DNS records for each domain added here, add a wildcard subdomain that points to this WordPress installation. It should look like:', $this->textdomain );
+							echo ' <strong>A *.domain.com</strong><br>';
+							_e( 'Pay attention that values of Wildcard DNS Availability column are refreshed each 5 minutes.', $this->textdomain );
+						else:
+							_e( 'Change the DNS records for each domain to point to this WordPress installation.', $this->textdomain );
 						endif;
-						?>
-					<?php else: ?>
-						<p><?php _e( 'Change the DNS records for each domain to point to this WordPress installation.', $this->textdomain ) ?></p>
-					<?php endif; ?>
+					?></p>
 				</div>
 
 				<div id="col-left">
@@ -600,17 +572,25 @@ class multi_domain {
 	 * Domain addition form.
 	 */
 	function add_domain_form() {
-		if( is_subdomain_install() )
-			$sites_format = 'blogname.domain1.com, blogname.domain2.com';
-		else
-			$sites_format = 'domain1.com/blogname, domain2.com/blogname';
+		$sites_format = is_subdomain_install()
+			? 'blogname.domain1.com, blogname.domain2.com'
+			: 'domain1.com/blogname, domain2.com/blogname';
 
-		echo '<p>' . sprintf( __( 'This feature allows you to set multiple domains that users can run their sites from, for example you can allow a user to run a site at %s and so on - all on this one Multisite install.', $this->textdomain ), $sites_format ) . '</p>';
-?>
+		$submit_url = add_query_arg( array(
+			'edit' => false,
+			'name' => false,
+		) );
 
-		<h3><?php _e( 'Add Domain', $this->textdomain ) ?></h3>
+		$description = sprintf(
+			__( 'This feature allows you to set multiple domains that users can run their sites from, for example you can allow a user to run a site at %s and so on - all on this one Multisite install.', $this->textdomain ),
+			$sites_format
+		);
 
-		<form id="domain-add" method="post" action="?page=multi-domains&action=adddomain">
+		?><h3><?php _e( 'Add Domain', $this->textdomain ) ?></h3>
+
+		<p><?php echo $description ?></p>
+
+		<form id="domain-add" method="post" action="<?php echo $submit_url ?>">
 			<table class="form-table">
 				<tbody>
 					<tr>
@@ -618,7 +598,7 @@ class multi_domain {
 						<td>http://<input type="text" name="domain_name" id="domain_name" title="<?php _e( 'The domain name', $this->textdomain ) ?>" /> <span class="description">(e.g.: domain.com)</span></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="domain_status"><?php _e( 'Domain Status', $this->textdomain ) ?>:</label></th>
+						<th scope="row"><label for="domain_status"><?php _e( 'Domain Visibility', $this->textdomain ) ?>:</label></th>
 						<td>
 							<select id="domain_status" name="domain_status">
 								<?php
@@ -661,22 +641,30 @@ class multi_domain {
 	 * Domain edition form.
 	 */
 	function edit_domain_form() {
-		if( !isset( $_GET['name'] ) )
+		if( !isset( $_GET['name'] ) ) {
 			return;
+		}
 
 		$domain = $this->get_domain( $_GET['name'] );
-?>
-		<h3><?php _e( 'Edit Domain', $this->textdomain ) ?></h3>
+		$submit_url = add_query_arg( array(
+			'edit' => false,
+			'name' => false,
+		) );
 
-		<form id="domain-edit" method="post" action="?page=multi-domains&action=editdomain">
+		?><h3><?php _e( 'Edit Domain', $this->textdomain ) ?></h3>
+
+		<form id="domain-edit" method="post" action="<?php echo $submit_url ?>">
 			<table class="form-table">
 				<tbody>
 					<tr>
 						<th scope="row"><label for="domain_name"><?php _e( 'Domain Name', $this->textdomain ) ?>:</label></th>
-						<td>http://<input type="text" name="domain_name" id="domain_name" title="<?php _e( 'The domain name', $this->textdomain ) ?>" value="<?php echo $domain['domain_name'];  ?>" /></td>
+						<td>
+							http://<span title="<?php _e( 'The domain name', $this->textdomain ) ?>"><?php echo esc_html( $domain['domain_name'] ) ?></span>
+							<input type="hidden" name="domain_name" value="<?php echo esc_attr( $domain['domain_name'] ) ?>">
+						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="domain_status"><?php _e( 'Domain Status', $this->textdomain ) ?>:</label></th>
+						<th scope="row"><label for="domain_status"><?php _e( 'Domain Visibility', $this->textdomain ) ?>:</label></th>
 						<td>
 							<select id="domain_status" name="domain_status">
 								<?php
@@ -693,8 +681,7 @@ class multi_domain {
 			<p class="submit">
 				<input type="submit" class="button-primary" name="edit_domain" value="<?php _e( 'Save Domain', $this->textdomain ) ?>" />
 			</p>
-		</form>
-<?php
+		</form><?php
 	}
 
 	/**

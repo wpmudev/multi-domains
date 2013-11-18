@@ -157,18 +157,50 @@ class Multidomains_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Returns domain status.
+	 * Returns domain visibility.
 	 *
 	 * @since 1.3.1
 	 *
 	 * @access public
 	 * @param array $item Array of domain data.
-	 * @return string Domain status.
+	 * @return string Domain visibility.
 	 */
-	public function column_status( $item ) {
+	public function column_visibility( $item ) {
 		return !empty( $item['domain_status'] )
 			? $item['domain_status']
 			: esc_html__( 'unknown', 'multi_domain' );
+	}
+
+	/**
+	 * Returns wildcard DNS availability status.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @access public
+	 * @param array $item Array of domain data.
+	 * @return string Wildcard DNS availability status.
+	 */
+	public function column_availability( $item ) {
+		$true = '<b style="color:green">' . __( 'available', 'multi_domain' ) . '</b>';
+		$false = '<b style="color:red">' . __( 'unavailable', 'multi_domain' ) . '</b>';
+
+		if ( $item['domain_name'] == DOMAIN_CURRENT_SITE ) {
+			return $true;
+		}
+
+		$transient = 'multi_domain_availability-' . $item['domain_name'];
+		$available = get_site_transient( $transient );
+		if ( $available === false ) {
+			$response = wp_remote_get( 'http://' . substr( md5( time() ), 0, 6 ) . '.' . $item['domain_name'], array(
+				'timeout'     => 5,
+				'httpversion' => '1.1',
+			) );
+
+			$available = !is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) == 200;
+			set_site_transient( $transient, $available ? 1 : 0, 5 * MINUTE_IN_SECONDS );
+		}
+
+		return $available ? $true : $false;
 	}
 
 	/**
@@ -180,11 +212,17 @@ class Multidomains_Table extends WP_List_Table {
 	 * @return array The array of table columns to display.
 	 */
 	public function get_columns() {
-		return array(
-			'cb'     => '<input type="checkbox" class="cb_all">',
-			'domain' => __( 'Domain', 'multi_domain' ),
-			'status' => __( 'Status', 'multi_domain' ),
+		$columns = array(
+			'cb'         => '<input type="checkbox" class="cb_all">',
+			'domain'     => __( 'Domain', 'multi_domain' ),
+			'visibility' => __( 'Visibility', 'multi_domain' ),
 		);
+
+		if ( is_subdomain_install() ) {
+			$columns['availability'] = __( 'Wildcard DNS Availability', 'multi_domain' );
+		}
+
+		return $columns;
 	}
 
 	/**
