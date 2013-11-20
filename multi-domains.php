@@ -752,27 +752,23 @@ class multi_domain {
 	 * Set $current_site and $domain globals with values chosen by the user.
 	 */
 	function set_registration_globals( $blogname = '' ) {
-		global $domain;
+		global $domain, $current_site;
 
-		if( isset( $_POST['domain'] ) ) {
+		if ( isset( $_POST['domain'] ) ) {
 
 			$current_site->domain = $_POST['domain'];
-
-			if( is_subdomain_install() && is_user_logged_in() ) {
-
-					$blogname = isset( $_POST['blogname'] ) ? $_POST['blogname'] : '';
-
+			if ( is_subdomain_install() && is_user_logged_in() ) {
+				$blogname = isset( $_POST['blogname'] ) ? $_POST['blogname'] : '';
 			}
 
 			$domain = $_POST['domain'];
 
 			//$this->modify_current_site( $current_site );
 			// This is just wrong on so many levels... but it seems to get the job done.
-			add_action('check_admin_referer', create_function(
+			add_action( 'check_admin_referer', create_function(
 				'$action,$domain="' . $current_site->domain . '"',
 				'global $current_site; if ("add-site" == $action || "add-blog" == $action) $current_site->domain=$domain;'
-			), 10, 1);
-
+			), 10, 1 );
 		}
 
 		return $blogname;
