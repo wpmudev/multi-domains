@@ -35,26 +35,7 @@ if( !is_multisite() ) {
 	wp_die( __( 'The Multi-Domains plugin is only compatible with WordPress Multisite.', 'multi_domain' ) );
 }
 
-// Show notification if WPMUDEV Update Notifications plugin is not installed
-if ( !function_exists( 'wdp_un_check' ) ) {
-	add_action( 'admin_notices', 'wdp_un_check', 5 );
-	add_action( 'network_admin_notices', 'wdp_un_check', 5 );
-	function wdp_un_check() {
-		if ( !class_exists( 'WPMUDEV_Update_Notifications' ) && current_user_can( 'edit_users' ) ) {
-			echo '<div class="error fade">';
-				echo '<p>';
-					printf(
-						__( 'Please install the latest version of %sour free Update Notifications plugin%s which helps you stay up-to-date with the most stable, secure versions of WPMU DEV themes and plugins. %sMore information%s', 'wpmudev' ),
-						'<a href="http://premium.wpmudev.org/project/update-notifications/" title="Download Now &raquo;">',
-						'</a>',
-						'<a href="http://premium.wpmudev.org/wpmu-dev/update-notifications-plugin-information/">',
-						' &raquo;</a>'
-					);
-				echo '</p>';
-			echo '</div>';
-		}
-	}
-}
+require_once dirname( __FILE__ ) . '/extra/wpmudev-dash-notification.php';
 
 class multi_domain {
 
@@ -170,19 +151,13 @@ class multi_domain {
 	 * Run plugin functions.
 	 */
 	function setup_plugin() {
-		global $wp_version;
-
 		$this->domains = get_site_option( 'md_domains' );
 
 		// handle translations
 		load_plugin_textdomain( $this->textdomain, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 		// Add the super admin page
-		if ( version_compare( $wp_version, '3.0.9', '>' ) ) {
-			add_action( 'network_admin_menu', array( $this, 'network_admin_page' ) );
-		} else {
-			add_action( 'admin_menu', array( $this, 'pre_3_1_network_admin_page' ) );
-		}
+		add_action( 'network_admin_menu', array( $this, 'network_admin_page' ) );
 
 		// Enqueue javascript
 		$this->enqueue_jquery();
@@ -255,15 +230,16 @@ class multi_domain {
 	 * Add network admin page
 	 */
 	function network_admin_page() {
-		$title = __( 'Multi-Domains', $this->textdomain );
-		add_submenu_page( 'settings.php', $title, $title, 'manage_network', 'multi-domains', array( $this, 'management_page' ) );
-	}
+		global $wpmudev_notices;
 
-	/**
-	 * Add network admin page the old way
-	 */
-	function pre_3_1_network_admin_page() {
-		add_submenu_page( 'ms-admin.php', __( 'Multi-Domains', $this->textdomain ), __( 'Multi-Domains', $this->textdomain ), 'manage_network', 'multi-domains', array( $this, 'management_page' ) );
+		$title = __( 'Multi-Domains', $this->textdomain );
+		$page = add_submenu_page( 'settings.php', $title, $title, 'manage_network', 'multi-domains', array( $this, 'management_page' ) );
+
+		$wpmudev_notices[] = array(
+			'id'      => 154,
+			'name'    => 'Multi-Domains for Multisite',
+			'screens' => array( "{$page}-network" ),
+		);
 	}
 
 	/**
@@ -1166,5 +1142,6 @@ class multi_domain {
 	}
 
 }
+
 
 $multi_dm = new multi_domain();

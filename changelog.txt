@@ -3,6 +3,7 @@
 * Reworked network admin domains page
 * Improved performance for case when a lot domains are added
 * Fixed minor issues
+* Integrated new WPMUDEV dashboard notifications class
 
 == 1.3 ==
 
