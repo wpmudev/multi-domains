@@ -282,21 +282,17 @@ class multi_domain {
 	 * Add domain column to Super Admin > Sites table.
 	 */
 	function manage_blogs_custom_column( $column_name, $blog_id ) {
-
-		if( !is_subdomain_install() ) {
+		if ( !is_subdomain_install() ) {
 			$bloginfo = get_blog_details( (int) $blog_id, false );
 			echo $bloginfo->domain;
 		}
-
 	}
 
 	/**
 	 * Update domains in the database.
 	 */
 	function update_domains_option() {
-
 		return update_site_option( 'md_domains', apply_filters( 'md_update_domains_option', $this->domains_sort() ) );
-
 	}
 
 	/**
@@ -811,6 +807,11 @@ class multi_domain {
 		}
 
 		if ( count( $domains = $this->domains ) > 1 ) {
+			$primary = wp_list_filter( $domains, array( 'domain_name' => DOMAIN_CURRENT_SITE ) );
+			$else = wp_list_filter( $domains, array( 'domain_name' => DOMAIN_CURRENT_SITE ), 'NOT' );
+
+			$domains = array_merge( $primary, $else );
+
 			$super_admin = is_super_admin();
 			$show_restricted_domains = $this->show_restricted_domains();
 			$posted_domain = isset( $_POST['domain'] ) ? $_POST['domain'] : '';

@@ -243,6 +243,11 @@ class Multidomains_Table extends WP_List_Table {
 		$offset = ( $this->get_pagenum() - 1 ) * $per_page;
 
 		$items = get_site_option( 'md_domains' );
+		$primary = wp_list_filter( $items, array( 'domain_name' => DOMAIN_CURRENT_SITE ) );
+		$else = wp_list_filter( $items, array( 'domain_name' => DOMAIN_CURRENT_SITE ), 'NOT' );
+
+		$items = array_merge( $primary, $else );
+
 		$search = isset( $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 		if ( !empty( $search ) ) {
 			$tmp = array();
