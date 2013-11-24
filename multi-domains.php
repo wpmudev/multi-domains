@@ -459,10 +459,10 @@ class multi_domain {
 
 			<?php echo implode( '', $messages ) ?>
 
-			<?php if ( !file_exists( ABSPATH . '/wp-content/sunrise.php' ) ) : ?>
+			<?php if ( !file_exists( WP_CONTENT_DIR . '/sunrise.php' ) ) : ?>
 				<div id="message" class="error">
 					<p><?php
-						printf( __( 'Please copy the %1$s to %2$s%3$s and uncomment the SUNRISE setting in the %2$s%4$s file.', $this->textdomain ), 'sunrise.php', ABSPATH, 'wp-content/sunrise.php', 'wp-config.php' )
+						printf( __( 'Please copy the %1$s to %2$s%3$s and uncomment the SUNRISE setting in the %2$s%4$s file.', $this->textdomain ), 'sunrise.php', WP_CONTENT_DIR, '/sunrise.php', 'wp-config.php' )
 					?></p>
 				</div>
 			<?php endif; ?>
