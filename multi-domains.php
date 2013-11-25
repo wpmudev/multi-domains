@@ -452,6 +452,9 @@ class multi_domain {
 			}
 		}
 
+		$exists = is_readable( WP_CONTENT_DIR . '/sunrise.php' );
+		$valid = defined( 'MULTIDOMAINS_SUNRISE_VERSION' ) && version_compare( MULTIDOMAINS_SUNRISE_VERSION, $this->sunrise, '=' );
+
 		?><div class="wrap" style="position: relative">
 
 			<div id="icon-ms-admin" class="icon32"></div>
@@ -459,10 +462,16 @@ class multi_domain {
 
 			<?php echo implode( '', $messages ) ?>
 
-			<?php if ( !file_exists( WP_CONTENT_DIR . '/sunrise.php' ) ) : ?>
+			<?php if ( !$exists ) : ?>
 				<div id="message" class="error">
 					<p><?php
-						printf( __( 'Please copy the %1$s to %2$s%3$s and uncomment the SUNRISE setting in the %2$s%4$s file.', $this->textdomain ), 'sunrise.php', WP_CONTENT_DIR, '/sunrise.php', 'wp-config.php' )
+						printf( __( 'Please copy the %1$s to %2$s/%1$s and uncomment the SUNRISE setting in the %2$s/%3$s file.', $this->textdomain ), 'sunrise.php', WP_CONTENT_DIR, 'wp-config.php' )
+					?></p>
+				</div>
+			<?php elseif ( !$valid ) : ?>
+				<div id="message" class="error">
+					<p><?php
+						printf( __( 'Please copy the content of %1$s into %2$s/%1$s and uncomment the SUNRISE setting in the %2$s/%3$s file.', $this->textdomain ), 'sunrise.php', WP_CONTENT_DIR, 'wp-config.php' )
 					?></p>
 				</div>
 			<?php endif; ?>
@@ -1110,8 +1119,6 @@ class multi_domain {
 			$global_content = file_get_contents( $global_sunrise );
 			$local_content = file_get_contents( $local_sunrise );
 			$pattern = sprintf( '/%s.*?%s/is', preg_quote( 'function multi_domains_sunrise()', '/' ), preg_quote( 'multi_domains_sunrise();', '/' ) );
-
-			$found = preg_match( $pattern, $local_content, $matches );
 
 			// files is already exists, update it
 			if ( $defined ) {

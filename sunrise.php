@@ -7,7 +7,7 @@ function multi_domains_sunrise() {
 	define( 'MULTIDOMAINS_SUNRISE_VERSION', '1.0.0' );
 
 	if ( defined( 'COOKIE_DOMAIN' ) ) {
-		if ( defined( 'DOMAIN_MAPPING' ) ) {
+		if ( defined( 'DOMAIN_MAPPING' ) || defined( 'DOMAINMAPPING_SUNRISE_VERSION' ) ) {
 			// don't do anything if domain mapping has already processed the domain
 			return;
 		} else {
