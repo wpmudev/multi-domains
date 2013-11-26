@@ -4,7 +4,7 @@ function multi_domains_sunrise() {
 	global $wpdb;
 
 	// set multi-domains sunrise version
-	define( 'MULTIDOMAINS_SUNRISE_VERSION', '1.0.0' );
+	define( 'MULTIDOMAINS_SUNRISE_VERSION', '1.0.1' );
 
 	if ( defined( 'COOKIE_DOMAIN' ) ) {
 		if ( defined( 'DOMAIN_MAPPING' ) || defined( 'DOMAINMAPPING_SUNRISE_VERSION' ) ) {

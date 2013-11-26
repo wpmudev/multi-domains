@@ -58,7 +58,7 @@ class multi_domain {
 	 *
 	 * @var string
 	 */
-	var $sunrise = '1.0.0';
+	var $sunrise = '1.0.1';
 
 	/**
 	 * Database object
