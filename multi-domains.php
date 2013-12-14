@@ -736,7 +736,6 @@ class multi_domain {
 		global $domain, $current_site;
 
 		if ( isset( $_POST['domain'] ) ) {
-
 			$current_site->domain = $_POST['domain'];
 			if ( is_subdomain_install() && is_user_logged_in() ) {
 				$blogname = isset( $_POST['blogname'] ) ? $_POST['blogname'] : '';
@@ -750,6 +749,8 @@ class multi_domain {
 				'$action,$domain="' . $current_site->domain . '"',
 				'global $current_site; if ("add-site" == $action || "add-blog" == $action) $current_site->domain=$domain;'
 			), 10, 1 );
+
+			add_filter( 'redirect_network_admin_request', '__return_false' );
 		}
 
 		return $blogname;

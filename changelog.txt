@@ -1,3 +1,7 @@
+== 1.3.2 ==
+
+* Fixed site creation issue which appears when trying to create a site via admin dashboard
+
 == 1.3.1 ==
 
 * Reworked network admin domains page
