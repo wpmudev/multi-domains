@@ -479,7 +479,7 @@ class multi_domain {
 			<?php if ( !defined( 'SUNRISE' ) ) : ?>
 				<div id="message" class="error">
 					<p><?php
-						printf( __( 'Please uncomment the line %s in the %s file.', $this->textdomain ), "<em>//define( 'SUNRISE', 'on' );</em>", ABSPATH . wp-config.php )
+						printf( __( 'Please uncomment the line %s in the %s file.', $this->textdomain ), "<em>//define( 'SUNRISE', 'on' );</em>", ABSPATH . 'wp-config.php' )
 					?></p>
 				</div>
 			<?php endif; ?>
