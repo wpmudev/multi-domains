@@ -183,11 +183,11 @@ class multi_domain {
 		// Cross domain cookies
 		if ( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) {
 			add_action( 'wp_loaded', array( $this, 'maybe_logout_user' ) );
-			add_action( 'admin_head', array( $this, 'build_cookie' ) );
-			if ( defined( 'BP_VERSION' ) ) {
-				add_action( 'wp_head', array( $this, 'build_cookie' ) );
-			}
-			add_action( 'check_admin_referer', array( $this, 'build_logout_cookie' ) );
+            add_action( 'wp_login', array( $this, 'build_cookie' ) );
+//			if ( defined( 'BP_VERSION' ) ) {
+//				add_action( 'wp_head', array( $this, 'build_cookie' ) );
+//			}
+            add_action( 'wp_logout', array( $this, 'build_logout_cookie' ) );
 		}
 
 		// modify blog columns on Super Admin > Sites page
