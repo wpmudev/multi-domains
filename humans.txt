@@ -7,3 +7,8 @@
 	Location: Kiev, Ukraine
 	Contact: eugene[at]incsub[dot]com
 	Twitter: @eugene_manuilov
+
+    Developer: Sam Najian
+    Location: Tehran, Iran
+    Contact: sam[at]incsub[dot]com
+    Twitter: @samnajian

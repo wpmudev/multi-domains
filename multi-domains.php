@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.3.2
+Version: 1.3.3
 Network: true
 Text Domain: multi_domain
 Author: Incsub
@@ -36,7 +36,8 @@ if( !is_multisite() ) {
 }
 
 require_once dirname( __FILE__ ) . '/extra/wpmudev-dash-notification.php';
-include_once "Multidomain_Cdsso.php";
+include_once dirname( __FILE__ ) . "/multi-domains-sso.php";
+
 class multi_domain {
 
 	/**
@@ -51,7 +52,7 @@ class multi_domain {
 	 *
 	 * @var string
 	 */
-	var $version = '1.3.2';
+	var $version = '1.3.3';
 
 	/**
 	 * Sunrise version
@@ -110,7 +111,7 @@ class multi_domain {
          */
         $mapping_options = get_site_option("domain_mapping");
         if ( get_site_option( 'multi_domains_single_signon' ) === 'enabled' &&   ( !class_exists("Domainmap_Module_Cdsso") || ( class_exists("Domainmap_Module_Cdsso") && false === $mapping_options['map_crossautologin'] ) ) ) {
-            new Multidomain_Cdsso();
+            new Multidomains_Sso();
         }
 	}
 
@@ -1045,6 +1046,67 @@ class multi_domain {
 			@copy( $local_sunrise, $global_sunrise );
 		}
 	}
+
+    /**
+     * Registers an action hook.
+     *
+     * @since 1.3.3
+     * @uses add_action() To register action hook.
+     *
+     * @access protected
+     * @param string $tag The name of the action to which the $method is hooked.
+     * @param string $method The name of the method to be called.
+     * @param int $priority optional. Used to specify the order in which the functions associated with a particular action are executed (default: 10). Lower numbers correspond with earlier execution, and functions with the same priority are executed in the order in which they were added to the action.
+     * @param int $accepted_args optional. The number of arguments the function accept (default 1).
+     * @return $this
+     */
+    protected function _add_action( $tag, $method = '', $priority = 10, $accepted_args = 1 ) {
+        add_action( $tag, array( $this, empty( $method ) ? $tag : $method ), $priority, $accepted_args );
+        return $this;
+    }
+
+    /**
+     * Registers AJAX action hook.
+     *
+     * @since 1.3.3
+     *
+     * @access public
+     * @param string $tag The name of the AJAX action to which the $method is hooked.
+     * @param string $method Optional. The name of the method to be called. If the name of the method is not provided, tag name will be used as method name.
+     * @param boolean $private Optional. Determines if we should register hook for logged in users.
+     * @param boolean $public Optional. Determines if we should register hook for not logged in users.
+     * @return $this
+     */
+    protected function _add_ajax_action( $tag, $method = '', $private = true, $public = false ) {
+        if ( $private ) {
+            $this->_add_action( 'wp_ajax_' . $tag, $method );
+        }
+
+        if ( $public ) {
+            $this->_add_action( 'wp_ajax_nopriv_' . $tag, $method );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Registers a filter hook.
+     *
+     * @since 1.3.3
+     * @uses add_filter() To register filter hook.
+     *
+     * @access protected
+     * @param string $tag The name of the filter to hook the $method to.
+     * @param type $method The name of the method to be called when the filter is applied.
+     * @param int $priority optional. Used to specify the order in which the functions associated with a particular action are executed (default: 10). Lower numbers correspond with earlier execution, and functions with the same priority are executed in the order in which they were added to the action.
+     * @param int $accepted_args optional. The number of arguments the function accept (default 1).
+     * @return $this
+     */
+    protected function _add_filter( $tag, $method = '', $priority = 10, $accepted_args = 1 ) {
+        add_filter( $tag, array( $this, empty( $method ) ? $tag : $method ), $priority, $accepted_args );
+        return $this;
+    }
+
 
 }
 
