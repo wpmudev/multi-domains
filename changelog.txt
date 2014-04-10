@@ -1,4 +1,4 @@
-== 1.3.2.2 ==
+== 1.3.3 ==
 
 * Added Multidomains_Sso
 * Fixed cross domain single signon issue
