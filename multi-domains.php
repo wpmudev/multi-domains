@@ -36,7 +36,7 @@ if( !is_multisite() ) {
 }
 
 require_once dirname( __FILE__ ) . '/extra/wpmudev-dash-notification.php';
-
+include_once "Multidomain_Cdsso.php";
 class multi_domain {
 
 	/**
@@ -103,6 +103,15 @@ class multi_domain {
 		if ( is_network_admin() && is_subdomain_install() && !$skip_site_search ) {
 			add_filter( 'query', array( $this, 'subdomain_filter_site_search_query' ) );
 		}
+
+
+        /**
+         * Handle cross domain single sign on if domain mapping's single signon is not active
+         */
+        $mapping_options = get_site_option("domain_mapping");
+        if ( get_site_option( 'multi_domains_single_signon' ) === 'enabled' &&   ( !class_exists("Domainmap_Module_Cdsso") || ( class_exists("Domainmap_Module_Cdsso") && false === $mapping_options['map_crossautologin'] ) ) ) {
+            new Multidomain_Cdsso();
+        }
 	}
 
 	function subdomain_filter_site_search_query( $query ) {
@@ -180,15 +189,6 @@ class multi_domain {
 		add_action( 'signup_blogform', array( $this, 'extend_signup_blogform' ) ); // default and buddypress blog creation forms
 		add_action( 'bp_signup_blog_url_errors', array( $this, 'extend_signup_blogform' ) ); // buddypress signup form
 		add_action( 'admin_footer', array( $this, 'extend_admin_blogform' ) ); // admin site creation form
-		// Cross domain cookies
-		if ( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) {
-			add_action( 'wp_loaded', array( $this, 'maybe_logout_user' ) );
-            add_action( 'wp_login', array( $this, 'build_cookie' ) );
-//			if ( defined( 'BP_VERSION' ) ) {
-//				add_action( 'wp_head', array( $this, 'build_cookie' ) );
-//			}
-            add_action( 'wp_logout', array( $this, 'build_logout_cookie' ) );
-		}
 
 		// modify blog columns on Super Admin > Sites page
 		add_filter( 'wpmu_blogs_columns', array( $this, 'blogs_columns' ) );
@@ -952,111 +952,8 @@ class multi_domain {
 		}
 	}
 
-	/**
-	 * Log user out if value set in database.
-	 */
-	function maybe_logout_user() {
-		$dom = str_replace( '.', '', $_SERVER['HTTP_HOST'] );
-		$key = (array)get_site_option( "multi_domains_cross_domain_$dom" );
-
-		if ( is_user_logged_in() ) {
-			$user_id = get_current_user_id();
-			if ( array_key_exists( $user_id, $key ) && $key[$user_id]['action'] == 'logout' ) {
-				wp_clear_auth_cookie();
-
-				delete_transient( "multi_domains_{$dom}_{$user_id}" );
-
-				unset( $key[$user_id] );
-				update_site_option( "multi_domains_cross_domain_$dom", $key );
-
-				$referer = wp_get_referer();
-				$proto = is_ssl() ? 'https://' : 'http://';
-				$redirect = ( strpos( $_SERVER['REQUEST_URI'], '/options.php' ) && $referer ) ? $referer : $proto . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
-				wp_redirect( wp_login_url( $redirect, true ) );
-				exit();
-			}
-		}
-	}
-
-	/**
-	 * Build logout cookie.
-	 */
-	function build_logout_cookie( $action ) {
-
-		$dom = str_replace( '.', '', $_SERVER[ 'HTTP_HOST' ] );
-		$key = (array)get_site_option( "multi_domains_cross_domain_$dom" );
-
-		if ( 'log-out' == $action ) {
-			$this->build_cookie( 'logout' );
-
-			$user_id = get_current_user_id();
-			unset( $key[$user_id] );
-			update_site_option( "multi_domains_cross_domain_$dom", $key );
-		}
-	}
-
-	/**
-	 * Build login cookie.
-	 */
-	function build_cookie( $action = 'login' ) {
-		$blogs = get_blogs_of_user( get_current_user_id() );
-		if ( is_array( $blogs ) ) {
-			foreach ( $blogs as $val ) {
-				$this->build_blog_cookie( $action, $val->userblog_id );
-			}
-		}
-
-	}
-
-	/**
-	 * Build login cookie.
-	 */
-	function build_blog_cookie( $action = 'login', $userblog_id = ''  ) {
-
-		global $blog_id;
-
-		if( $action == '' ) $action = 'login';
-
-		$url = false;
-
-		if ( class_exists( 'domain_map' ) && defined( 'DOMAIN_MAPPING' ) ) {
-			$domain = $this->db->get_var( "SELECT domain FROM {$this->db->dmtable} WHERE blog_id = '{$userblog_id}' ORDER BY id LIMIT 1" );
-			if($domain) {
-				$dom = str_replace( '.', '', $domain );
-				$url = 'http://' . $domain . '/';
-			}
-		} else {
-			$domains = $this->db->get_row( "SELECT domain, path FROM {$this->db->blogs} WHERE blog_id = '{$userblog_id}' LIMIT 1" );
-			$dom = str_replace( '.', '', $domains->domain );
-			$url = 'http://' . $domains->domain . $domains->path;
-		}
-
-		if( $url ) {
-			$key = get_site_option( "multi_domains_cross_domain_$dom", array() );
-
-			$user_id = get_current_user_id();
-
-			if( ! isset( $key[$user_id]['action'] ) || ( isset( $key[$user_id]['action'] ) && $key[$user_id]['action'] !== $action ) ) {
-				$key[$user_id] = array (
-					'domain'	=> $url,
-					'action'	=> $action
-				);
-
-				update_site_option( "multi_domains_cross_domain_$dom", $key );
-			}
-
-			$hash = md5( AUTH_KEY . 'multi_domains' );
-
-			if ( $blog_id !== $userblog_id && 'login' == $action /*&& get_transient( "multi_domains_{$dom}_{$user_id}" ) !== 'add'*/ ) { // Removing transient check
-				echo '<link rel="stylesheet" href="' . $url . $hash . '.css?build=' . date( "Ymd", strtotime( '-24 days' ) ) . '&id=' . $user_id .'" type="text/css" media="screen" />';
-
-				set_transient( "multi_domains_{$dom}_{$user_id}", 'add', 60 * 15 );
-			}
-		}
 
 
-	}
 
 	/**
 	 * Build stylesheet for cookie.
