@@ -215,11 +215,10 @@ class Multidomains_Sso extends multi_domain{
 			$current_domain = parse_url( $home, PHP_URL_HOST );
 			$original_domain = parse_url( apply_filters( 'unswap_url', $home ), PHP_URL_HOST );
 
-			if ( $current_domain != $original_domain ) {
+			if ( $current_domain != $original_domain || !in_array( $current_domain, $this->get_original_domains() ) ) {
 				$interim_login = $this->_do_propagation = true;
 			}
 		}
-
 		return $redirect_to;
 	}
 
