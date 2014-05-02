@@ -6,7 +6,7 @@ Description: Easily allow users to create new sites (blogs) at multiple differen
 Version: 1.3.4.1
 Network: true
 Text Domain: multi_domain
-Author: Incsub
+Author: WPMU DEV
 Author URI: http://premium.wpmudev.org/
 WDP ID: 154
 */
