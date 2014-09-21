@@ -577,7 +577,7 @@ class multi_domain {
 
 		?><h3><?php _e( 'Add Domain', $this->textdomain ) ?></h3>
 
-		<p><?php echo $description ?></p>
+		<p style="padding-right: 5px"><?php echo $description ?></p>
 
 		<form id="domain-add" method="post" action="<?php echo $submit_url ?>">
 			<table class="form-table">
@@ -1000,57 +1000,18 @@ class multi_domain {
 	 * Upgrades sunrise.php file if need be.
 	 */
 	function upgrade_sunrise() {
-		// if sunrise.php has the latest version, then return
-		$defined = defined( 'MULTIDOMAINS_SUNRISE_VERSION' );
-		if ( $defined && version_compare( MULTIDOMAINS_SUNRISE_VERSION, $this->sunrise, '=' ) ) {
-			return;
-		}
+      if ( defined( 'SUNRISE' ) ) {
+        $dest = WP_CONTENT_DIR . '/sunrise.php';
+        $source = dirname( __FILE__ ) . '/sunrise.php';
 
-		$global_sunrise = WP_CONTENT_DIR . '/sunrise.php';
-		$local_sunrise = dirname( __FILE__ ) . '/sunrise.php';
+        $need_update = false;
+        $need_update |= !file_exists( $dest );
+        $need_update |= !defined( 'MULTIDOMAINS_SUNRISE_VERSION' ) || version_compare( MULTIDOMAINS_SUNRISE_VERSION, $this->sunrise, '<' );
 
-		// return if local sunrise.php file is not readable
-		if ( !is_readable( $local_sunrise ) ) {
-			return;
-		}
-
-		// copy new sunrise.php file or upgrade existing one
-		if ( file_exists( $global_sunrise ) ) {
-			// return if we can't write into sunrise.php file
-			if ( !is_writable( $global_sunrise ) ) {
-				return;
-			}
-
-			$global_content = file_get_contents( $global_sunrise );
-			$local_content = file_get_contents( $local_sunrise );
-			$pattern = sprintf( '/%s.*?%s/is', preg_quote( 'function multi_domains_sunrise()', '/' ), preg_quote( 'multi_domains_sunrise();', '/' ) );
-
-			// files is already exists, update it
-			if ( $defined ) {
-				// if version was defined but is deprecated, then replace old content on new content
-				if ( preg_match( $pattern, $local_content, $matches ) ) {
-					$global_content = preg_replace( $pattern, $matches[0], $global_content );
-				}
-			} else {
-				// version wasn't defined, so check if domain mapping was defined
-				if ( preg_match( "/\'DOMAIN_MAPPING\'/m", $global_content ) ) {
-					// check if it is old version of dm_sunrise.php file
-					if ( preg_match( "/\'md_domains\'/m", $global_content ) ) {
-						$global_content = $local_content;
-					} elseif ( preg_match( $pattern, $local_content, $matches ) ) {
-						$global_content .= PHP_EOL . PHP_EOL . $matches[0];
-					}
-				} else {
-					$global_content = $local_content;
-				}
-			}
-
-			file_put_contents( $global_sunrise, $global_content );
-
-		// copy new sunrise.php if we can write into wp-content directory
-		} elseif ( is_writable( WP_CONTENT_DIR ) ) {
-			@copy( $local_sunrise, $global_sunrise );
-		}
+        if ( $need_update && is_writable( WP_CONTENT_DIR ) && is_readable( $source ) ) {
+          @copy( $source, $dest );
+        }
+      }
 	}
 
     /**
