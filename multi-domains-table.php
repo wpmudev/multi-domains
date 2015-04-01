@@ -190,7 +190,7 @@ class Multidomains_Table extends WP_List_Table {
 
 		$transient = 'multi_domain_availability-' . $item['domain_name'];
 		$available = get_site_transient( $transient );
-		if ( $available === false ) {
+		if ( $available == false ) {
 			$response = wp_remote_get( 'http://' . substr( md5( time() ), 0, 6 ) . '.' . $item['domain_name'], array(
 				'timeout'     => 5,
 				'httpversion' => '1.1',
