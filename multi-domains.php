@@ -565,10 +565,10 @@ class multi_domain {
 			? 'blogname.domain1.com, blogname.domain2.com'
 			: 'domain1.com/blogname, domain2.com/blogname';
 
-		$submit_url = add_query_arg( array(
+		$submit_url = esc_url( add_query_arg( array(
 			'edit' => false,
 			'name' => false,
-		) );
+		) ) );
 
 		$description = sprintf(
 			__( 'This feature allows you to set multiple domains that users can run their sites from, for example you can allow a user to run a site at %s and so on - all on this one Multisite install.', $this->textdomain ),
@@ -635,10 +635,10 @@ class multi_domain {
 		}
 
 		$domain = $this->get_domain( $_GET['name'] );
-		$submit_url = add_query_arg( array(
+		$submit_url = esc_url( add_query_arg( array(
 			'edit' => false,
 			'name' => false,
-		) );
+		) ) );
 
 		?><h3><?php _e( 'Edit Domain', $this->textdomain ) ?></h3>
 
