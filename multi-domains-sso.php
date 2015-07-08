@@ -114,7 +114,7 @@ class Multidomains_Sso extends multi_domain{
 		$redirect_domain = parse_url( $redirect_to, PHP_URL_HOST );
 		if ( $login_domain != $redirect_domain ) {
 			$redirect_to = str_replace( "://{$redirect_domain}", "://{$login_domain}", $redirect_to );
-			$login_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
+			$login_url = esc_url_raw( add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url ) );
 		}
 
 		return $login_url;
@@ -144,7 +144,7 @@ class Multidomains_Sso extends multi_domain{
 	 */
 	public function add_logout_marker( $redirect_to ) {
 		if ( $this->_do_logout ) {
-			$redirect_to = add_query_arg( self::ACTION_KEY, self::ACTION_LOGOUT_USER, $redirect_to );
+			$redirect_to = esc_url_raw( add_query_arg( self::ACTION_KEY, self::ACTION_LOGOUT_USER, $redirect_to ) );
 		}
 
 		return $redirect_to;
@@ -165,7 +165,7 @@ class Multidomains_Sso extends multi_domain{
 		}
 
 		switch_to_blog( 1 );
-		$url = add_query_arg( 'action', self::ACTION_LOGOUT_USER, admin_url( 'admin-ajax.php' ) );
+		$url = esc_url( add_query_arg( 'action', self::ACTION_LOGOUT_USER, admin_url( 'admin-ajax.php' ) ) );
 		echo '<script type="text/javascript" src="', $url, '"></script>';
 		restore_current_blog();
 	}
@@ -189,7 +189,7 @@ class Multidomains_Sso extends multi_domain{
 		}
 
 		wp_clear_auth_cookie();
-		$url = add_query_arg( self::ACTION_KEY, false, $_SERVER['HTTP_REFERER'] );
+		$url = esc_url( add_query_arg( self::ACTION_KEY, false, $_SERVER['HTTP_REFERER'] ) );
 
 		echo 'window.location = "', $url, '";';
 		exit;
@@ -273,10 +273,10 @@ class Multidomains_Sso extends multi_domain{
 
 
 		switch_to_blog( 1 );
-		$url = add_query_arg( array(
+		$url = esc_url(add_query_arg( array(
 			'action' => self::ACTION_PROPAGATE_USER,
 			'auth'   => wp_generate_auth_cookie( $user->ID, time() + MINUTE_IN_SECONDS ),
-		), admin_url( 'admin-ajax.php' ) );
+		), admin_url( 'admin-ajax.php' ) ) );
 		restore_current_blog();
 
 		echo '<script type="text/javascript" src="', $url, '"></script>';
@@ -297,7 +297,7 @@ class Multidomains_Sso extends multi_domain{
 		}
 
 		switch_to_blog( 1 );
-		$url = add_query_arg( 'action', self::ACTION_SETUP_CDSSO, admin_url( 'admin-ajax.php' ) );
+		$url = esc_url( add_query_arg( 'action', self::ACTION_SETUP_CDSSO, admin_url( 'admin-ajax.php' ) ) );
 		echo '<script type="text/javascript" src="', $url, '"></script>';
 		restore_current_blog();
 	}
@@ -320,10 +320,10 @@ class Multidomains_Sso extends multi_domain{
 			exit;
 		}
 
-		$url = add_query_arg( array(
+		$url = esc_url( add_query_arg( array(
 			self::ACTION_KEY => self::ACTION_AUTHORIZE_USER,
 			'auth'           => wp_generate_auth_cookie( get_current_user_id(), time() + MINUTE_IN_SECONDS ),
-		), $_SERVER['HTTP_REFERER'] );
+		), $_SERVER['HTTP_REFERER'] ) );
 
 		echo 'window.location = "', $url, '";';
 		exit;
@@ -345,7 +345,7 @@ class Multidomains_Sso extends multi_domain{
 
 				$redirect_to = in_array( $GLOBALS['pagenow'], array( 'wp-login.php' ) ) && filter_input( INPUT_GET, 'redirect_to', FILTER_VALIDATE_URL )
 					? $_GET['redirect_to']
-					: add_query_arg( array( self::ACTION_KEY => false, 'auth' => false ) );
+					: esc_url_raw( add_query_arg( array( self::ACTION_KEY => false, 'auth' => false ) ) );
 
 				wp_redirect( $redirect_to );
 				exit;

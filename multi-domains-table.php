@@ -143,12 +143,12 @@ class Multidomains_Table extends WP_List_Table {
 		$actions = array(
 			'edit'   => sprintf(
 				'<a href="%s">%s</a>',
-				add_query_arg( array( 'edit' => '1', 'name' => $item['domain_name'] ) ),
+				esc_url( add_query_arg( array( 'edit' => '1', 'name' => $item['domain_name'] ) ) ),
 				__( 'Edit', 'multi_domain' )
 			),
 			'delete' => sprintf(
 				'<a href="%s" onclick="return showNotice.warn();">%s</a>',
-				add_query_arg( array( 'delete' => '1', 'name' => $item['domain_name'] ) ),
+				esc_url( add_query_arg( array( 'delete' => '1', 'name' => $item['domain_name'] ) ) ),
 				__( 'Delete', 'multi_domain' )
 			),
 		);
