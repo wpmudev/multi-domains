@@ -84,6 +84,7 @@ class multi_domain {
 
 
 
+    const FLUSHED_REWRITE_RULES = 'multidomains-flushed-rules-';
 	/**
 	 * Constructor
 	 */
@@ -449,7 +450,8 @@ class multi_domain {
 			}
 		} elseif ( !empty( $_GET['single_signon'] ) ) {
 			if ( 'enable' == $_GET['single_signon'] ) {
-				$messages[] = '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on enabled.', $this->textdomain ) . '</p></div>';
+                $_message = $_GET['async'] === "true" ? __( 'Async Single Sign-on enabled.', $this->textdomain ) : __( 'Sync Single Sign-on enabled.', $this->textdomain );
+				$messages[] = '<div id="message" class="updated fade"><p>' . $_message . '</p></div>';
 			} elseif ( 'disable' == $_GET['single_signon'] ) {
 				$messages[] = '<div id="message" class="updated fade"><p>' . __( 'Single Sign-on disabled.', $this->textdomain ) . '</p></div>';
 			}
@@ -519,7 +521,12 @@ class multi_domain {
 						<?php if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) : ?>
 							<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary"><?php _e( 'Disable Single Sign-on', $this->textdomain ) ?></a></p>
 						<?php else : ?>
-							<p><a href="?page=multi-domains&single_signon=enable" class="button-secondary"><?php _e( 'Enable Single Sign-on', $this->textdomain ) ?></a></p>
+							<p>
+                                <a href="?page=multi-domains&single_signon=enable&async=false" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Single Sync Sign-on', $this->textdomain ) ?></a>
+                            </p>
+                            <p>
+                                <a href="?page=multi-domains&single_signon=enable&async=true" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Single Async Sign-on', $this->textdomain ) ?></a>
+                            </p>
 						<?php endif; ?>
 					<?php endif; ?>
 				</div>
@@ -538,6 +545,10 @@ class multi_domain {
 			} else {
 				update_site_option( 'multi_domains_single_signon', 'disabled' );
 			}
+
+            // Save mether it's sync or async
+            update_site_option( 'multi_domains_single_signon_async', "true" === $_GET['async'] ? 1 : 0 );
+
 		}
 	}
 
@@ -791,6 +802,7 @@ class multi_domain {
 	 * Add domain choice to signup form.
 	 */
 	function extend_signup_blogform() {
+
 		wp_enqueue_script( 'jquery' );
 		if ( !defined( 'MD_DEQUEUE_PLACEMENT' ) || !MD_DEQUEUE_PLACEMENT ) {
 			wp_enqueue_script( 'md-placement', plugins_url( '/js/placement.js', __FILE__ ), array( 'jquery' ) );
@@ -1088,6 +1100,78 @@ class multi_domain {
         return $wpdb->get_col("SELECT `domain` FROM " . $wpdb->site);
     }
 
+    /**
+     * Checks if current site resides in original domain
+     *
+     * @since 4.2.0
+     *
+     * @param string $domain
+     * @return bool true if it's original domain, false if not
+     */
+    protected function is_original_domain( $domain = null ){
+
+        $domain = parse_url( is_null( $domain ) ? $this->_http->hostinfo : $domain  , PHP_URL_HOST );
+
+        /** MULTI DOMAINS INTEGRATION */
+        if( class_exists( 'multi_domain' ) ){
+            global $multi_dm;
+            if( is_array( $multi_dm->domains ) ){
+                foreach( $multi_dm->domains as $key => $domain_item){
+                    if( $domain === $domain_item['domain_name'] || strpos($domain, "." . $domain_item['domain_name']) ){
+                        return apply_filters("dm_is_original_domain", true, $domain);
+                    }
+                }
+            }
+        }
+
+        $is_oroginal_domain = $domain === $this->get_original_domains() || strpos($domain, "." . $this->get_original_domains());
+        return apply_filters("dm_is_original_domain", $is_oroginal_domain, $domain);
+    }
+
+    /**
+     * Checks if current site resides in mapped domain
+     *
+     * @since 4.2.0
+     *
+     * @param null $domain
+     *
+     * @return bool
+     */
+    protected function is_mapped_domain( $domain = null ){
+        return !$this->is_original_domain( $domain );
+    }
+
+    /**
+     * Replaces last occurence of string with $replace string
+     *
+     * @since 4.2.0.5
+     *
+     * @param $search
+     * @param $replace
+     * @param $string
+     *
+     * @return mixed
+     */
+    private function _replace_last_occurence($search, $replace, $string)
+    {
+        $pos = strrpos($string, $search);
+
+        if($pos !== false)
+            $string = substr_replace($string, $replace, $pos, strlen($search));
+
+        return $string;
+    }
+
+    /**
+     * Returns ajax url based on the main domain
+     *
+     * @since 4.2.0.4
+     * @param string $scheme The scheme to use. Default is 'admin', which obeys force_ssl_admin() and is_ssl(). 'http' or 'https' can be passed to force those schemes.
+     * @return mixed
+     */
+    protected function get_main_ajax_url( $scheme = 'admin'  ){
+        return  $this->_replace_last_occurence('network/', '', network_admin_url( 'admin-ajax.php', $scheme ) );
+    }
 }
 
 
