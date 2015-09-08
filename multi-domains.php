@@ -3,7 +3,7 @@
 Plugin Name: Multi-Domains for Multisite
 Plugin URI: http://premium.wpmudev.org/project/multi-domains/
 Description: Easily allow users to create new sites (blogs) at multiple different domains - using one install of WordPress Multisite you can support blogs at name.domain1.com, name.domain2.com etc.
-Version: 1.3.4.5
+Version: 1.3.4.6
 Network: true
 Text Domain: multi_domain
 Author: WPMU DEV
@@ -52,7 +52,7 @@ class multi_domain {
 	 *
 	 * @var stringget
 	 */
-	var $version = '1.3.4.4';
+	var $version = '1.3.4.6';
 
 	/**
 	 * Sunrise version
@@ -518,8 +518,10 @@ class multi_domain {
 						<h3><?php _e( 'Single Signon', $this->textdomain ) ?></h3>
 
 						<p><?php _e( 'The Single Sign-on feature synchronize login cookies on all the domains.', $this->textdomain ) ?></p>
-						<?php if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) : ?>
-							<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary"><?php _e( 'Disable Single Sign-on', $this->textdomain ) ?></a></p>
+						<?php if( get_site_option( 'multi_domains_single_signon' ) == 'enabled' ) :
+                            $disable_button_label =  (int) get_site_option("multi_domains_single_signon_async") === 1 ?__( 'Disable Async Single Sign-on', $this->textdomain ) : __( 'Disable Sync Single Sign-on', $this->textdomain );
+                            ?>
+							<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary"><?php echo $disable_button_label; ?></a></p>
 						<?php else : ?>
 							<p>
                                 <a href="?page=multi-domains&single_signon=enable&async=false" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Single Sync Sign-on', $this->textdomain ) ?></a>
@@ -1103,7 +1105,7 @@ class multi_domain {
     /**
      * Checks if current site resides in original domain
      *
-     * @since 4.2.0
+     * @since 1.3.4.6
      *
      * @param string $domain
      * @return bool true if it's original domain, false if not
@@ -1111,27 +1113,22 @@ class multi_domain {
     protected function is_original_domain( $domain = null ){
 
         $domain = parse_url( is_null( $domain ) ? $this->_http->hostinfo : $domain  , PHP_URL_HOST );
-
-        /** MULTI DOMAINS INTEGRATION */
-        if( class_exists( 'multi_domain' ) ){
-            global $multi_dm;
-            if( is_array( $multi_dm->domains ) ){
-                foreach( $multi_dm->domains as $key => $domain_item){
-                    if( $domain === $domain_item['domain_name'] || strpos($domain, "." . $domain_item['domain_name']) ){
-                        return apply_filters("dm_is_original_domain", true, $domain);
-                    }
+        if( is_array( $this->domains ) ){
+            foreach( $this->domains as $key => $domain_item){
+                if( $domain === $domain_item['domain_name'] || strpos($domain, "." . $domain_item['domain_name']) ){
+                    return apply_filters("md_is_original_domain", true, $domain);
                 }
             }
         }
 
-        $is_oroginal_domain = $domain === $this->get_original_domains() || strpos($domain, "." . $this->get_original_domains());
-        return apply_filters("dm_is_original_domain", $is_oroginal_domain, $domain);
+        $is_original_domain = in_array( $domain, $this->get_original_domains() );
+        return apply_filters("md_is_original_domain", $is_original_domain, $domain);
     }
 
     /**
      * Checks if current site resides in mapped domain
      *
-     * @since 4.2.0
+     * @since 1.3.4.6
      *
      * @param null $domain
      *
@@ -1144,7 +1141,7 @@ class multi_domain {
     /**
      * Replaces last occurence of string with $replace string
      *
-     * @since 4.2.0.5
+     * @since 1.3.4.6
      *
      * @param $search
      * @param $replace
@@ -1152,7 +1149,7 @@ class multi_domain {
      *
      * @return mixed
      */
-    private function _replace_last_occurence($search, $replace, $string)
+    private function _replace_last_occurrence($search, $replace, $string)
     {
         $pos = strrpos($string, $search);
 
@@ -1165,12 +1162,12 @@ class multi_domain {
     /**
      * Returns ajax url based on the main domain
      *
-     * @since 4.2.0.4
+     * @since 1.3.4.6
      * @param string $scheme The scheme to use. Default is 'admin', which obeys force_ssl_admin() and is_ssl(). 'http' or 'https' can be passed to force those schemes.
      * @return mixed
      */
     protected function get_main_ajax_url( $scheme = 'admin'  ){
-        return  $this->_replace_last_occurence('network/', '', network_admin_url( 'admin-ajax.php', $scheme ) );
+        return  $this->_replace_last_occurrence('network/', '', network_admin_url( 'admin-ajax.php', $scheme ) );
     }
 }
 

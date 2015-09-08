@@ -70,7 +70,7 @@ if( !class_exists("Multidomains_Sso") ):
      * @param Domainmap_Plugin $plugin The instance of the plugin class.
      */
     public function __construct() {
-        $this->_async =  get_site_option( 'multi_domains_single_signon_async', false);
+        $this->_async = (int) get_site_option( 'multi_domains_single_signon_async', 0);
 
         $this->_add_filter( 'login_redirect', 'set_interim_login', 10, 3 );
         $this->_add_filter( 'login_message', 'get_login_message' );
