@@ -1,4 +1,13 @@
 <?php
+function multi_domains_is_md_active(){
+    global $wpdb;
+    $dmmd_active_plugins = wp_cache_get("dmmd_active_plugins");
+    if( !$dmmd_active_plugins ){
+        $dmmd_active_plugins = unserialize( $wpdb->get_var("SELECT `meta_value` FROM " . $wpdb->sitemeta ." WHERE `meta_key`='active_sitewide_plugins'") );
+        wp_cache_set("dm_active_plugins", $dmmd_active_plugins);
+    }
+    return is_array($dmmd_active_plugins) ? in_array("multi-domains/multi-domains.php", array_keys( $dmmd_active_plugins )) : false;
+}
 
 function multi_domains_sunrise() {
 	global $wpdb;
@@ -49,4 +58,5 @@ function multi_domains_sunrise() {
 }
 
 // run sunrise
-multi_domains_sunrise();
+if( multi_domains_is_md_active() )
+    multi_domains_sunrise();
