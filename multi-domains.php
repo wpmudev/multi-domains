@@ -524,10 +524,10 @@ class multi_domain {
 							<p><a href="?page=multi-domains&single_signon=disable" class="button-secondary"><?php echo $disable_button_label; ?></a></p>
 						<?php else : ?>
 							<p>
-                                <a href="?page=multi-domains&single_signon=enable&async=false" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Single Sync Sign-on', $this->textdomain ) ?></a>
+                                <a href="?page=multi-domains&single_signon=enable&async=false" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Sync Single Sign-on', $this->textdomain ) ?></a>
                             </p>
                             <p>
-                                <a href="?page=multi-domains&single_signon=enable&async=true" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Single Async Sign-on', $this->textdomain ) ?></a>
+                                <a href="?page=multi-domains&single_signon=enable&async=true" class="button-secondary multidomains_sso_enable_button"><?php _e( 'Enable Async Single Sign-on', $this->textdomain ) ?></a>
                             </p>
 						<?php endif; ?>
 					<?php endif; ?>
