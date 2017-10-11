@@ -850,8 +850,11 @@ class multi_domain {
 ?>
 			<script type="text/javascript">
 			jQuery(document).ready(function() {
-				domain_input = jQuery('.form-table:last td:first input');
-				jQuery('.form-table:last td:first')
+				
+				var target_column = jQuery('#site-address').parent();
+				var domain_input = target_column.find( 'input' );
+								
+				target_column
 					.text('')
 					.append(domain_input)
 					.append('.<?php $this->extend_signup_blogform(); ?>' + '<p><?php _e( 'Only the characters a-z and 0-9 recommended.', $this->textdomain ) ?></p>');
@@ -862,8 +865,11 @@ class multi_domain {
 ?>
 			<script type="text/javascript">
 			jQuery(document).ready(function() {
-				domain_input = jQuery('.form-table:last td:first input');
-				jQuery('.form-table:last td:first')
+
+				var target_column = jQuery('#site-address').parent();
+				var domain_input = target_column.find( 'input' );
+
+				target_column
 					.text('')
 					.append('<?php $this->extend_signup_blogform(); ?>/')
 					.append(domain_input)
