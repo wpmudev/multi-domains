@@ -146,7 +146,7 @@ class multi_domain {
 		if ( empty( $version ) ) {
 			$domains = array(
 				array(
-					'domain_name'   => DOMAIN_CURRENT_SITE,
+					'domain_name'   => DOMAIN_CURRENT_SITE . PATH_CURRENT_SITE,
 					'domain_status' => 'public'
 				)
 			);
